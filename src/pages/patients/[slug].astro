@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import BeforeAfter from '../../components/BeforeAfter.astro';
+import BeforeAfterSlider from '../../components/BeforeAfterSlider.astro';
 import { afterPhoto, beforePhoto } from '../../lib/photos';
 import { monthYear, SITE_NAME } from '../../consts';
 
@@ -52,11 +52,12 @@ const description =
     </div>
     {before && (
       <div class="record">
-        <BeforeAfter
+        <p class="mono record-hint">Drag to compare</p>
+        <BeforeAfterSlider
           {before}
           {after}
           name={entry.data.name}
-          sizes="(max-width: 800px) calc(50vw - 44px), 356px"
+          sizes="(max-width: 800px) calc(100vw - 80px), 480px"
         />
       </div>
     )}
@@ -105,7 +106,15 @@ const description =
     margin: 0 0 26px;
     color: var(--story-text);
   }
-  .record { margin-top: 30px; }
+  .record {
+    margin-top: 30px;
+    max-width: 480px;
+  }
+  .record-hint {
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    margin-bottom: 14px;
+  }
   .provenance {
     font-size: 10.5px;
     letter-spacing: 0.12em;

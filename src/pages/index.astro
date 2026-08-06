@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NeighbourhoodMap from '../components/NeighbourhoodMap.astro';
 import Film from '../components/Film.astro';
-import BeforeAfter from '../components/BeforeAfter.astro';
+import BeforeAfterSlider from '../components/BeforeAfterSlider.astro';
 import { afterPhoto, beforePhoto } from '../lib/photos';
 import { SITE_NAME } from '../consts';
 import enriquePhoto from '../photos/site/enrique.jpg';
@@ -49,7 +49,10 @@ const wall = patients.map((p) => ({
   ].join(';'),
 }));
 
+const patientName = new Map(patients.map((p) => [p.id, p.data.name]));
 const comparisons = ['antonia', 'arcely', 'blanca'].map((slug) => ({
+  slug,
+  name: patientName.get(slug) ?? slug,
   before: beforePhoto(slug)!,
   after: afterPhoto(slug),
 }));
@@ -88,12 +91,8 @@ const press = [
   </section>
 
   <!-- Fly-in photo wall -->
-  <section class="wall">
+  <section class="wall" aria-label="The neighbours, after their appointment">
     <div class="wall-pin">
-      <div class="wall-head">
-        <p class="mono">Every face was treated by the fund · tap anyone to read their story</p>
-        <h2>The neighbours, after their appointment</h2>
-      </div>
       <div class="tiles">
         {wall.map(({ patient, photo, style }) => (
           <a class="tile" href={`/patients/${patient.id}/`} title={patient.data.name} style={style}>
@@ -111,28 +110,30 @@ const press = [
 
   <!-- Enrique -->
   <section class="enrique">
-    <p class="mono head">The hands that did the work</p>
-    <h2>Enrique Berrios</h2>
-    <div class="enrique-row">
-      <div class="portrait">
-        <Image
-          src={enriquePhoto}
-          alt="Dr. Enrique Berrios in his dental chair"
-          widths={[287]}
-          sizes="(max-width: 700px) 80vw, 320px"
-        />
-        <p class="mono credit">Dr. Enrique Berrios · Diente Zonte</p>
-      </div>
-      <div class="bio">
-        <p class="quote">
-          "Surrounded by colourful birds, mango trees, snakes and insects, and of course the blue
-          sky and ocean."
-        </p>
-        <p class="about">
-          The area's only dentist for sixteen years. His clinic is six metres by four, jungle on
-          every side. He treated neighbours who could not pay long before anyone said the word
-          Bitcoin to him. Every treatment in this report happened in his chair.
-        </p>
+    <div class="enrique-inner">
+      <p class="mono head">The hands that did the work</p>
+      <h2>Enrique Berrios</h2>
+      <div class="enrique-row">
+        <div class="portrait">
+          <Image
+            src={enriquePhoto}
+            alt="Dr. Enrique Berrios in his dental chair"
+            widths={[287]}
+            sizes="(max-width: 700px) 80vw, 320px"
+          />
+          <p class="mono credit">Dr. Enrique Berrios · Diente Zonte</p>
+        </div>
+        <div class="bio">
+          <p class="quote">
+            "Surrounded by colourful birds, mango trees, snakes and insects, and of course the
+            blue sky and ocean."
+          </p>
+          <p class="about">
+            The area's only dentist for sixteen years. His clinic is six metres by four, jungle on
+            every side. He treated neighbours who could not pay long before anyone said the word
+            Bitcoin to him. Every treatment in this report happened in his chair.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -173,14 +174,14 @@ const press = [
         </div>
       </div>
       <div class="comparisons">
-        {comparisons.map(({ before, after }) => (
+        {comparisons.map(({ slug, name, before, after }) => (
           <div class="reveal" style="--r0:10%;--r1:55%">
-            <BeforeAfter {before} {after} />
+            <BeforeAfterSlider {before} {after} {name} sizes="(max-width: 700px) 92vw, 430px" />
           </div>
         ))}
       </div>
       <p class="mono records">
-        Details from the clinic's records, shown without faces · published with permission
+        From the clinic's records · drag to compare · published with permission
       </p>
     </div>
   </section>
@@ -249,19 +250,6 @@ const press = [
     flex-direction: column;
     justify-content: flex-end;
   }
-  .wall-head {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 34px 48px 6px;
-  }
-  .wall-head h2 {
-    font-size: clamp(28px, 3.4vw, 52px);
-    line-height: 1;
-    text-transform: uppercase;
-    margin: 0;
-  }
   .tiles {
     display: flex;
     flex-wrap: wrap;
@@ -293,7 +281,6 @@ const press = [
   }
   /* On phones a 10-wide row makes faces unrecognisable; go 5-wide instead. */
   @media (max-width: 640px) {
-    .wall-head { padding: 28px 24px 6px; }
     .tiles { padding: 18px 12px 14px; gap: 8px; }
     .tile { width: calc(20% - 7px); height: calc(10% - 8px); }
   }
@@ -303,11 +290,15 @@ const press = [
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     justify-content: center;
     padding: 120px 48px;
     background: var(--ink);
     color: #fff;
+  }
+  .enrique-inner {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
   }
   .enrique .head { color: var(--muted-on-dark); }
   .enrique h2 {
@@ -318,10 +309,10 @@ const press = [
   }
   .enrique-row {
     display: flex;
-    gap: clamp(40px, 5vw, 80px);
-    align-items: flex-end;
+    gap: clamp(40px, 6vw, 110px);
+    align-items: center;
     flex-wrap: wrap;
-    margin-top: 44px;
+    margin-top: clamp(44px, 6vh, 70px);
   }
   .portrait { flex-shrink: 0; }
   .portrait img {
@@ -337,7 +328,7 @@ const press = [
     color: var(--muted-on-dark);
     margin-top: 12px;
   }
-  .bio { max-width: 52ch; }
+  .bio { flex: 1 1 380px; max-width: 56ch; }
   .quote {
     font-family: var(--font-mono);
     font-size: 13px;
@@ -457,11 +448,6 @@ const press = [
         height: 100vh;
         overflow: hidden;
         perspective: 1100px;
-      }
-      .wall-head {
-        animation: chunk linear both;
-        animation-timeline: --fly;
-        animation-range: contain 35% contain 60%;
       }
       .tile {
         animation: tileIn linear both;

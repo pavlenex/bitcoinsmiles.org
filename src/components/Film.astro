@@ -1,22 +1,29 @@
 ---
+import { Image } from 'astro:assets';
 import { FILM_YOUTUBE_ID } from '../consts';
+import filmStill from '../photos/site/clinic.webp';
 
-// Full-bleed ambient film, pinned for 200vh of scroll. The YouTube iframe
-// (~1MB of third-party JS) is only injected when the section approaches the
-// viewport, so it costs nothing on initial load.
+// Full-bleed ambient film, pinned for 200vh of scroll.
+// Poster-first: the clinic still is the section's face. The YouTube iframe is
+// injected only when scrolled near, kept invisible, and faded in only once the
+// player reports it is actually playing — so YouTube's error/bot screens can
+// never appear. If the video can't play, the still simply stays.
 const watchUrl = `https://www.youtube.com/watch?v=${FILM_YOUTUBE_ID}`;
 ---
 
 <section class="film" data-film data-video-id={FILM_YOUTUBE_ID}>
   <div class="pin">
+    <div class="poster">
+      <Image src={filmStill} alt="" widths={[960, 1440, 1920]} sizes="100vw" loading="lazy" />
+    </div>
     <div class="frame" data-film-frame></div>
     <div class="shade"></div>
     <div class="copy">
-      <h2>Behind a surf beach, a bad tooth costs a day's pay</h2>
+      <h2>Watch the smiles come back</h2>
       <div class="row">
         <p>
-          Work in the hills of El Zonte is paid by the day. Some had not seen a dentist in forty
-          years. Then the internet showed up.
+          Work in the hills of El Zonte is paid by the day, and a dentist was always out of
+          reach — some neighbours had not seen one in forty years. Then the internet showed up.
         </p>
         <a class="watch" href={watchUrl} target="_blank" rel="noopener">Watch with sound</a>
       </div>
@@ -33,6 +40,20 @@ const watchUrl = `https://www.youtube.com/watch?v=${FILM_YOUTUBE_ID}`;
     overflow: hidden;
     background: var(--ink);
   }
+  .poster,
+  .poster img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .poster::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.45);
+  }
   .frame :global(iframe) {
     position: absolute;
     left: 50%;
@@ -42,7 +63,10 @@ const watchUrl = `https://www.youtube.com/watch?v=${FILM_YOUTUBE_ID}`;
     transform: translate(-50%, -50%);
     pointer-events: none;
     border: 0;
+    opacity: 0;
+    transition: opacity 0.8s ease;
   }
+  .frame :global(iframe.is-playing) { opacity: 1; }
   .shade {
     position: absolute;
     inset: 0;
@@ -81,8 +105,8 @@ const watchUrl = `https://www.youtube.com/watch?v=${FILM_YOUTUBE_ID}`;
     font-size: clamp(15px, 1.3vw, 18px);
     line-height: 1.6;
     margin: 0;
-    max-width: 44ch;
-    color: rgba(255, 255, 255, 0.75);
+    max-width: 46ch;
+    color: rgba(255, 255, 255, 0.78);
   }
   .watch {
     text-decoration: none;
@@ -127,23 +151,57 @@ const watchUrl = `https://www.youtube.com/watch?v=${FILM_YOUTUBE_ID}`;
 </style>
 
 <script>
+  const YT_ORIGIN = 'https://www.youtube-nocookie.com';
   const section = document.querySelector<HTMLElement>('[data-film]');
   const frame = section?.querySelector<HTMLElement>('[data-film-frame]');
+
   if (section && frame) {
     const id = section.dataset.videoId;
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Fade the iframe in only once YouTube reports playerState 1 (playing).
+    const revealWhenPlaying = (iframe: HTMLIFrameElement) => {
+      const onMessage = (e: MessageEvent) => {
+        if (e.origin !== YT_ORIGIN || e.source !== iframe.contentWindow) return;
+        if (typeof e.data !== 'string') return;
+        try {
+          const msg = JSON.parse(e.data);
+          const state = msg.event === 'onStateChange' ? msg.info : msg.info?.playerState;
+          if (state === 1) {
+            iframe.classList.add('is-playing');
+            removeEventListener('message', onMessage);
+          }
+        } catch {
+          /* not a player message */
+        }
+      };
+      addEventListener('message', onMessage);
+      iframe.addEventListener('load', () => {
+        // Handshake that asks the embed to start posting state events.
+        iframe.contentWindow?.postMessage(
+          JSON.stringify({ event: 'listening', id: 'film', channel: 'widget' }),
+          YT_ORIGIN
+        );
+      });
+    };
+
     const load = () => {
       const iframe = document.createElement('iframe');
-      const params = reducedMotion
-        ? 'autoplay=0&mute=1&controls=1&modestbranding=1&playsinline=1&rel=0'
-        : `autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&playsinline=1&rel=0`;
-      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?${params}`;
+      const base = `enablejsapi=1&origin=${encodeURIComponent(location.origin)}&playsinline=1&rel=0&modestbranding=1`;
       iframe.title = 'Bitcoin Smiles film';
       iframe.allow = 'autoplay; encrypted-media';
-      // With reduced motion there's no autoplay, so let the user press play.
-      if (reducedMotion) iframe.style.pointerEvents = 'auto';
+      if (reducedMotion) {
+        // No autoplay: show a standard, clickable player instead.
+        iframe.src = `${YT_ORIGIN}/embed/${id}?${base}&controls=1`;
+        iframe.style.pointerEvents = 'auto';
+        iframe.style.opacity = '1';
+      } else {
+        iframe.src = `${YT_ORIGIN}/embed/${id}?${base}&autoplay=1&mute=1&loop=1&playlist=${id}&controls=0`;
+        revealWhenPlaying(iframe);
+      }
       frame.appendChild(iframe);
     };
+
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {

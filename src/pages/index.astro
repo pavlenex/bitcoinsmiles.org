@@ -113,16 +113,16 @@ const press = [
     <div class="enrique-inner">
       <p class="mono head">The hands that did the work</p>
       <h2>Enrique Berrios</h2>
-      <div class="enrique-row">
-        <div class="portrait">
+      <div class="enrique-grid">
+        <figure class="portrait">
           <Image
             src={enriquePhoto}
             alt="Dr. Enrique Berrios in his dental chair"
             widths={[287]}
-            sizes="(max-width: 700px) 80vw, 320px"
+            sizes="(max-width: 700px) 80vw, 340px"
           />
-          <p class="mono credit">Dr. Enrique Berrios · Diente Zonte</p>
-        </div>
+          <figcaption class="mono credit">Dr. Enrique Berrios · Diente Zonte</figcaption>
+        </figure>
         <div class="bio">
           <p class="quote">
             "Surrounded by colourful birds, mango trees, snakes and insects, and of course the
@@ -307,16 +307,16 @@ const press = [
     text-transform: uppercase;
     margin: 20px 0 0;
   }
-  .enrique-row {
-    display: flex;
-    gap: clamp(40px, 6vw, 110px);
+  .enrique-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 340px) 1fr;
+    gap: clamp(44px, 6vw, 110px);
     align-items: center;
-    flex-wrap: wrap;
-    margin-top: clamp(44px, 6vh, 70px);
+    margin-top: clamp(44px, 6vh, 72px);
   }
-  .portrait { flex-shrink: 0; }
+  .portrait { margin: 0; }
   .portrait img {
-    width: clamp(220px, 22vw, 320px);
+    width: 100%;
     height: auto;
     aspect-ratio: 0.85;
     object-fit: cover;
@@ -328,19 +328,27 @@ const press = [
     color: var(--muted-on-dark);
     margin-top: 12px;
   }
-  .bio { flex: 1 1 380px; max-width: 56ch; }
+  .bio { max-width: 62ch; }
   .quote {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.7;
-    margin: 0 0 22px;
-    color: var(--muted-on-dark);
+    /* Enrique's own words, in the site's handwriting face. */
+    font-family: var(--font-hand);
+    font-weight: 600;
+    font-size: clamp(28px, 2.8vw, 46px);
+    line-height: 1.2;
+    margin: 0 0 30px;
+    max-width: 24ch;
+    color: #fff;
   }
   .about {
     font-size: clamp(16px, 1.4vw, 20px);
     line-height: 1.65;
     margin: 0;
+    max-width: 52ch;
     color: rgba(255, 255, 255, 0.8);
+  }
+  @media (max-width: 700px) {
+    .enrique-grid { grid-template-columns: 1fr; }
+    .portrait { max-width: 340px; }
   }
 
   /* --- Numbers --- */
@@ -465,7 +473,7 @@ const press = [
         animation-timeline: view();
         animation-range: entry 15% entry 65%;
       }
-      .enrique-row {
+      .enrique-grid {
         animation: chunk linear both;
         animation-timeline: view();
         animation-range: entry 25% entry 75%;

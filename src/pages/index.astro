@@ -1,0 +1,510 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import NeighbourhoodMap from '../components/NeighbourhoodMap.astro';
+import Film from '../components/Film.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import { afterPhoto, beforePhoto } from '../lib/photos';
+import { SITE_NAME } from '../consts';
+import enriquePhoto from '../photos/site/enrique.jpg';
+
+import bitcoinCa from '../photos/supporters/bitcoin-ca.png';
+import peakshift from '../photos/supporters/peakshift.png';
+import square from '../photos/supporters/square.png';
+import swan from '../photos/supporters/swan.png';
+import theBitcoinCompany from '../photos/supporters/the-bitcoin-company.png';
+import theBiz from '../photos/supporters/the-biz.png';
+import walletOfSatoshi from '../photos/supporters/wallet-of-satoshi.png';
+import bitcoinMagazine from '../photos/press/bitcoinmagazine.png';
+import beInCrypto from '../photos/press/beincrypto.png';
+import bitmymoney from '../photos/press/bitmymoney.png';
+
+const patients = (await getCollection('patients')).sort((a, b) => a.data.order - b.data.order);
+
+// Deterministic scatter for the fly-in wall: same ranges as the original
+// hand-tuned values, but generated from a fixed seed so every patient —
+// including ones added later — gets a tile without anyone editing CSS.
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(20210903);
+const settle = [-18, -5, 6, 12, 16];
+const wall = patients.map((p) => ({
+  patient: p,
+  photo: afterPhoto(p.id),
+  style: [
+    `--tx:${Math.round(rand() * 121 - 64)}vw`,
+    `--ty:${Math.round(56 + rand() * 60)}vh`,
+    `--tr:${Math.round(rand() * 34 - 18)}deg`,
+    `--ts:${(1.5 + rand() * 1.15).toFixed(2)}`,
+    `--sy:${settle[Math.floor(rand() * settle.length)]}px`,
+    `--re:${26 + Math.round(rand() * 8)}%`,
+  ].join(';'),
+}));
+
+const comparisons = ['antonia', 'arcely', 'blanca'].map((slug) => ({
+  before: beforePhoto(slug)!,
+  after: afterPhoto(slug),
+}));
+
+const supporters = [
+  { img: bitcoinCa, name: 'Bitcoin CA' },
+  { img: peakshift, name: 'Peakshift' },
+  { img: square, name: 'Square' },
+  { img: swan, name: 'Swan' },
+  { img: theBitcoinCompany, name: 'The Bitcoin Company' },
+  { img: theBiz, name: 'The Biz' },
+  { img: walletOfSatoshi, name: 'Wallet of Satoshi' },
+];
+const press = [
+  { img: bitcoinMagazine, name: 'Bitcoin Magazine' },
+  { img: beInCrypto, name: 'BeInCrypto' },
+  { img: bitmymoney, name: 'Bitmymoney' },
+];
+---
+
+<Base title={`${SITE_NAME} — Bring smiles back to the neighbourhood`}>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <h1>Bring smiles back to the neighbourhood</h1>
+        <p>
+          One dentist in the jungle of El Zonte, thousands of strangers on the internet, and a
+          Bitcoin fund that four years later still pays for every appointment.
+        </p>
+      </div>
+      <div class="hero-map">
+        <NeighbourhoodMap />
+      </div>
+    </div>
+  </section>
+
+  <!-- Fly-in photo wall -->
+  <section class="wall">
+    <div class="wall-pin">
+      <div class="wall-head">
+        <p class="mono">Every face was treated by the fund · tap anyone to read their story</p>
+        <h2>The neighbours, after their appointment</h2>
+      </div>
+      <div class="tiles">
+        {wall.map(({ patient, photo, style }) => (
+          <a class="tile" href={`/patients/${patient.id}/`} title={patient.data.name} style={style}>
+            <Image
+              src={photo}
+              alt={patient.data.name}
+              widths={[240, 480]}
+              sizes="(max-width: 640px) 20vw, 10vw"
+            />
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Enrique -->
+  <section class="enrique">
+    <p class="mono head">The hands that did the work</p>
+    <h2>Enrique Berrios</h2>
+    <div class="enrique-row">
+      <div class="portrait">
+        <Image
+          src={enriquePhoto}
+          alt="Dr. Enrique Berrios in his dental chair"
+          widths={[287]}
+          sizes="(max-width: 700px) 80vw, 320px"
+        />
+        <p class="mono credit">Dr. Enrique Berrios · Diente Zonte</p>
+      </div>
+      <div class="bio">
+        <p class="quote">
+          "Surrounded by colourful birds, mango trees, snakes and insects, and of course the blue
+          sky and ocean."
+        </p>
+        <p class="about">
+          The area's only dentist for sixteen years. His clinic is six metres by four, jungle on
+          every side. He treated neighbours who could not pay long before anyone said the word
+          Bitcoin to him. Every treatment in this report happened in his chair.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Film />
+
+  <!-- The numbers -->
+  <section class="numbers">
+    <div class="numbers-pin">
+      <div class="num num-1">
+        <p class="figure">2,741 people</p>
+        <p class="mono caption">from all over the internet funded it</p>
+      </div>
+      <div class="num num-2">
+        <p class="figure">1.9 BTC</p>
+        <p class="mono caption">raised on free software. The goal was 1. Zero fees, zero middlemen</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Where it went -->
+  <section class="went">
+    <div class="went-inner">
+      <p class="mono reveal">Where it went</p>
+      <h2 class="reveal" style="--r0:15%;--r1:55%">Four years of appointments, one fund</h2>
+      <div class="stats">
+        <div class="reveal" style="--r0:20%;--r1:60%">
+          <p class="stat">500+</p>
+          <p class="mono stat-caption">patients treated, free of charge</p>
+        </div>
+        <div class="reveal" style="--r0:28%;--r1:68%">
+          <p class="stat">80+</p>
+          <p class="mono stat-caption">full dental reconstructions, teeth rebuilt from nothing</p>
+        </div>
+        <div class="reveal" style="--r0:36%;--r1:76%">
+          <p class="stat">300+</p>
+          <p class="mono stat-caption">children given preventive care before the damage starts</p>
+        </div>
+      </div>
+      <div class="comparisons">
+        {comparisons.map(({ before, after }) => (
+          <div class="reveal" style="--r0:10%;--r1:55%">
+            <BeforeAfter {before} {after} />
+          </div>
+        ))}
+      </div>
+      <p class="mono records">
+        Details from the clinic's records, shown without faces · published with permission
+      </p>
+    </div>
+  </section>
+
+  <!-- Supporters & press -->
+  <section class="backers">
+    <div class="backers-inner">
+      <p class="mono head-dark">Supported by</p>
+      <div class="logos supporters">
+        {supporters.map(({ img, name }) => (
+          <img src={img.src} width={img.width} height={img.height} alt={name} loading="lazy" />
+        ))}
+      </div>
+      <p class="mono head-dark">Written about in</p>
+      <div class="logos press">
+        {press.map(({ img, name }) => (
+          <img src={img.src} width={img.width} height={img.height} alt={name} loading="lazy" />
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* --- Hero --- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: clamp(64px, 9vh, 110px);
+  }
+  .hero-inner {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(28px, 4vw, 50px);
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 3.4vw, 48px) 30px;
+  }
+  .hero-copy { flex: 0.9 1 320px; min-width: 0; }
+  h1 {
+    font-family: var(--font-hand);
+    font-weight: 700;
+    font-size: clamp(46px, 6.4vw, 108px);
+    line-height: 0.98;
+    margin: 0;
+    max-width: 14ch;
+  }
+  .hero-copy p {
+    font-size: clamp(16px, 1.4vw, 20px);
+    line-height: 1.65;
+    margin: 34px 0 0;
+    max-width: 50ch;
+    color: var(--body-text);
+  }
+  .hero-map { flex: 1.35 1 420px; min-width: 0; }
+
+  /* --- Fly-in wall --- */
+  .wall { background: var(--paper-warm); }
+  .wall-pin {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .wall-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 34px 48px 6px;
+  }
+  .wall-head h2 {
+    font-size: clamp(28px, 3.4vw, 52px);
+    line-height: 1;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .tiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: stretch;
+    gap: 10px;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    padding: 22px 18px 18px;
+    transform-style: preserve-3d;
+  }
+  .tile {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: #efefef;
+    width: calc(10% - 9px);
+    height: calc(20% - 8px);
+    min-height: 0;
+  }
+  .tile img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+  /* On phones a 10-wide row makes faces unrecognisable; go 5-wide instead. */
+  @media (max-width: 640px) {
+    .wall-head { padding: 28px 24px 6px; }
+    .tiles { padding: 18px 12px 14px; gap: 8px; }
+    .tile { width: calc(20% - 7px); height: calc(10% - 8px); }
+  }
+
+  /* --- Enrique --- */
+  .enrique {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 120px 48px;
+    background: var(--ink);
+    color: #fff;
+  }
+  .enrique .head { color: var(--muted-on-dark); }
+  .enrique h2 {
+    font-size: clamp(52px, 8vw, 150px);
+    line-height: 0.9;
+    text-transform: uppercase;
+    margin: 20px 0 0;
+  }
+  .enrique-row {
+    display: flex;
+    gap: clamp(40px, 5vw, 80px);
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-top: 44px;
+  }
+  .portrait { flex-shrink: 0; }
+  .portrait img {
+    width: clamp(220px, 22vw, 320px);
+    height: auto;
+    aspect-ratio: 0.85;
+    object-fit: cover;
+    display: block;
+  }
+  .credit {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--muted-on-dark);
+    margin-top: 12px;
+  }
+  .bio { max-width: 52ch; }
+  .quote {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0 0 22px;
+    color: var(--muted-on-dark);
+  }
+  .about {
+    font-size: clamp(16px, 1.4vw, 20px);
+    line-height: 1.65;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* --- Numbers --- */
+  .numbers { background: var(--ink); color: #fff; }
+  .num {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 48px;
+  }
+  .figure {
+    font-size: clamp(80px, 15vw, 260px);
+    line-height: 0.85;
+    font-family: var(--font-display);
+    margin: 0;
+  }
+  .caption {
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    color: var(--muted-on-dark);
+    margin-top: 30px;
+  }
+
+  /* --- Where it went --- */
+  .went { background: var(--paper); padding: 140px 48px; }
+  .went-inner { max-width: 1400px; margin: 0 auto; }
+  .went h2 {
+    font-size: clamp(32px, 4.4vw, 72px);
+    line-height: 1;
+    text-transform: uppercase;
+    margin: 20px 0 0;
+    max-width: 20ch;
+  }
+  .stats,
+  .comparisons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: clamp(30px, 4vw, 70px);
+  }
+  .stats { margin-top: 80px; }
+  .comparisons { margin-top: 100px; }
+  .stat {
+    font-size: clamp(60px, 7.5vw, 130px);
+    line-height: 0.85;
+    font-family: var(--font-display);
+    margin: 0;
+  }
+  .stat-caption {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: #555;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .records { font-size: 11px; letter-spacing: 0.14em; margin-top: 26px; }
+
+  /* --- Supporters & press --- */
+  .backers { background: var(--ink); color: #fff; }
+  .backers-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 120px 48px 0;
+    text-align: center;
+  }
+  .head-dark { color: var(--muted-on-dark); }
+  .logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    column-gap: clamp(44px, 6vw, 100px);
+    row-gap: 56px;
+  }
+  .logos img {
+    max-height: 72px;
+    max-width: 220px;
+    width: auto;
+    height: auto;
+    filter: grayscale(1) brightness(10);
+  }
+  .supporters { margin: 52px auto 100px; max-width: 1100px; }
+  .press { margin: 48px 0 0; padding-bottom: 40px; }
+
+  @media (max-width: 640px) {
+    .enrique { padding: 90px 24px; }
+    .num { padding: 0 24px; }
+    .went { padding: 100px 24px; }
+    .backers-inner { padding: 90px 24px 0; }
+  }
+
+  /* --- Scroll-driven choreography (browsers with animation-timeline) ---
+     Also gated on motion preference: the pinned/stacked layouts only make
+     sense when the animations that resolve them are allowed to run. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .wall {
+        height: 130vh;
+        view-timeline: --fly block;
+      }
+      .wall-pin {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+        perspective: 1100px;
+      }
+      .wall-head {
+        animation: chunk linear both;
+        animation-timeline: --fly;
+        animation-range: contain 35% contain 60%;
+      }
+      .tile {
+        animation: tileIn linear both;
+        animation-timeline: --fly;
+        animation-range: entry 60% contain var(--re, 30%);
+        will-change: transform, opacity;
+      }
+      .enrique .head {
+        animation: chunk linear both;
+        animation-timeline: view();
+        animation-range: entry 10% entry 50%;
+      }
+      .enrique h2 {
+        animation: numIn linear both;
+        animation-timeline: view();
+        animation-range: entry 15% entry 65%;
+      }
+      .enrique-row {
+        animation: chunk linear both;
+        animation-timeline: view();
+        animation-range: entry 25% entry 75%;
+      }
+      .numbers {
+        height: 300vh;
+        view-timeline: --num block;
+      }
+      .numbers-pin {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .num { position: absolute; inset: 0; }
+      .num-1 {
+        animation: numIn linear both, numOut linear both;
+        animation-timeline: --num, --num;
+        animation-range: contain 0% contain 26%, contain 36% contain 50%;
+      }
+      .num-2 {
+        animation: numIn linear both;
+        animation-timeline: --num;
+        animation-range: contain 48% contain 74%;
+      }
+    }
+  }
+</style>

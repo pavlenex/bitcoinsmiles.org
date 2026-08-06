@@ -1,0 +1,97 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { afterPhoto } from '../../lib/photos';
+import { monthYear, SITE_NAME } from '../../consts';
+
+const patients = (await getCollection('patients')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title={`The patients — ${SITE_NAME}`}>
+  <div class="wrap">
+    <h1>The patients</h1>
+    <p class="intro">
+      Enrique keeps a record of every person he treats: their work, what they had been living
+      with, what was done. Some stories are hard. They are told the way the people who lived them
+      wanted them told.
+    </p>
+    <div class="grid">
+      {patients.map((p) => (
+        <a class="card reveal" href={`/patients/${p.id}/`}>
+          <div class="photo">
+            <Image
+              src={afterPhoto(p.id)}
+              alt={p.data.name}
+              widths={[300, 600]}
+              sizes="(max-width: 520px) 44vw, (max-width: 1100px) 30vw, 300px"
+            />
+          </div>
+          <div class="meta">
+            <p class="name">{p.data.name}</p>
+            <p class="date">{monthYear(p.data.date)}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>
+
+<style>
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 130px 40px 120px;
+  }
+  h1 {
+    font-size: clamp(48px, 8vw, 140px);
+    line-height: 0.9;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .intro {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--body-text);
+    max-width: 52ch;
+    margin: 24px 0 60px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    text-decoration: none;
+    color: var(--ink);
+    display: block;
+    --r0: 0%;
+    --r1: 32%;
+  }
+  .photo { overflow: hidden; background: #efefef; }
+  .photo img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 0.85;
+    object-fit: cover;
+    display: block;
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 10px;
+    gap: 10px;
+  }
+  .name { font-size: 14.5px; font-weight: 700; margin: 0; }
+  .date {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 110px 24px 90px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  }
+</style>

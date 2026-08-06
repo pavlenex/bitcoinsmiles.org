@@ -1,0 +1,132 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import BeforeAfter from '../../components/BeforeAfter.astro';
+import { afterPhoto, beforePhoto } from '../../lib/photos';
+import { monthYear, SITE_NAME } from '../../consts';
+
+export async function getStaticPaths() {
+  const patients = (await getCollection('patients')).sort((a, b) => a.data.order - b.data.order);
+  return patients.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: patients[i - 1] ?? null, next: patients[i + 1] ?? null },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const after = afterPhoto(entry.id);
+const before = beforePhoto(entry.id);
+
+// First story paragraph, clipped at a word boundary, as the meta description.
+const firstParagraph = (entry.body ?? '').trim().split(/\n\s*\n/)[0] ?? '';
+const description =
+  firstParagraph.length > 160
+    ? `${firstParagraph.slice(0, 157).replace(/\s+\S*$/, '')}…`
+    : firstParagraph;
+---
+
+<Base
+  title={`${entry.data.name} — ${SITE_NAME}`}
+  description={description}
+  shareImage={after}
+  ogType="article"
+>
+  <article>
+    <a class="mono back" href="/patients/">← All patients</a>
+    <h1>{entry.data.name}</h1>
+    <p class="mono treated">Treated {monthYear(entry.data.date)} · {entry.data.funding}</p>
+    <figure>
+      <Image
+        src={after}
+        alt={`${entry.data.name} after treatment`}
+        widths={[720, 1080, 1440]}
+        sizes="(max-width: 800px) calc(100vw - 80px), 720px"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </figure>
+    <div class="story">
+      <Content />
+    </div>
+    {before && (
+      <div class="record">
+        <BeforeAfter
+          {before}
+          {after}
+          name={entry.data.name}
+          sizes="(max-width: 800px) calc(50vw - 44px), 356px"
+        />
+      </div>
+    )}
+    <p class="mono provenance">Recorded by the clinic · published with permission</p>
+    <nav class="pager" aria-label="Patients">
+      {prev && <a href={`/patients/${prev.id}/`}>← {prev.data.name}</a>}
+      {next && <a class="next" href={`/patients/${next.id}/`}>{next.data.name} →</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  article {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 130px 40px 120px;
+  }
+  .back {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+  }
+  h1 {
+    font-size: clamp(48px, 7vw, 110px);
+    line-height: 0.9;
+    text-transform: uppercase;
+    margin: 36px 0 12px;
+  }
+  .treated {
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    margin-bottom: 44px;
+  }
+  figure { margin: 0; }
+  figure img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.3;
+    object-fit: cover;
+    display: block;
+  }
+  .story { margin-top: 52px; }
+  .story :global(p) {
+    font-size: 19px;
+    line-height: 1.75;
+    margin: 0 0 26px;
+    color: var(--story-text);
+  }
+  .record { margin-top: 30px; }
+  .provenance {
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+    margin-top: 44px;
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 56px;
+  }
+  .pager a {
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .pager .next { margin-left: auto; }
+  @media (max-width: 640px) {
+    article { padding: 110px 24px 90px; }
+  }
+</style>

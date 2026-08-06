@@ -1,0 +1,158 @@
+---
+import { FILM_YOUTUBE_ID } from '../consts';
+
+// Full-bleed ambient film, pinned for 200vh of scroll. The YouTube iframe
+// (~1MB of third-party JS) is only injected when the section approaches the
+// viewport, so it costs nothing on initial load.
+const watchUrl = `https://www.youtube.com/watch?v=${FILM_YOUTUBE_ID}`;
+---
+
+<section class="film" data-film data-video-id={FILM_YOUTUBE_ID}>
+  <div class="pin">
+    <div class="frame" data-film-frame></div>
+    <div class="shade"></div>
+    <div class="copy">
+      <h2>Behind a surf beach, a bad tooth costs a day's pay</h2>
+      <div class="row">
+        <p>
+          Work in the hills of El Zonte is paid by the day. Some had not seen a dentist in forty
+          years. Then the internet showed up.
+        </p>
+        <a class="watch" href={watchUrl} target="_blank" rel="noopener">Watch with sound</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .film { background: var(--ink); }
+  .pin {
+    position: sticky;
+    top: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    background: var(--ink);
+  }
+  .frame :global(iframe) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, 178vh);
+    height: max(56.25vw, 100vh);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    border: 0;
+  }
+  .shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(10, 10, 10, 0.85) 0%,
+      rgba(10, 10, 10, 0.05) 55%,
+      rgba(10, 10, 10, 0.35) 100%
+    );
+    pointer-events: none;
+  }
+  .copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 48px 56px;
+    color: #fff;
+  }
+  h2 {
+    font-size: clamp(32px, 4.4vw, 72px);
+    line-height: 1;
+    text-transform: uppercase;
+    margin: 0;
+    max-width: 18ch;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+  p {
+    font-size: clamp(15px, 1.3vw, 18px);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 44ch;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .watch {
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 14px 26px;
+    white-space: nowrap;
+  }
+  .watch:hover { color: #fff; border-color: #fff; }
+  @media (max-width: 640px) {
+    .copy { padding: 0 24px 40px; }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .film {
+        height: 200vh;
+        view-timeline: --film block;
+      }
+      .pin { height: 100vh; }
+      h2 {
+        animation: chunk linear both;
+        animation-timeline: --film;
+        animation-range: contain 5% contain 30%;
+      }
+      p {
+        animation: chunk linear both;
+        animation-timeline: --film;
+        animation-range: contain 10% contain 38%;
+      }
+      .watch {
+        animation: chunk linear both;
+        animation-timeline: --film;
+        animation-range: contain 14% contain 42%;
+      }
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector<HTMLElement>('[data-film]');
+  const frame = section?.querySelector<HTMLElement>('[data-film-frame]');
+  if (section && frame) {
+    const id = section.dataset.videoId;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const load = () => {
+      const iframe = document.createElement('iframe');
+      const params = reducedMotion
+        ? 'autoplay=0&mute=1&controls=1&modestbranding=1&playsinline=1&rel=0'
+        : `autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&playsinline=1&rel=0`;
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?${params}`;
+      iframe.title = 'Bitcoin Smiles film';
+      iframe.allow = 'autoplay; encrypted-media';
+      // With reduced motion there's no autoplay, so let the user press play.
+      if (reducedMotion) iframe.style.pointerEvents = 'auto';
+      frame.appendChild(iframe);
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          load();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+    io.observe(section);
+  }
+</script>

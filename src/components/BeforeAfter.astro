@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Side-by-side treatment detail, zoomed to the mouth so archival photos read
+// as clinical record rather than portrait (matches the original homepage).
+interface Props {
+  before: ImageMetadata;
+  after: ImageMetadata;
+  name?: string;
+  sizes?: string;
+}
+
+const { before, after, name, sizes = '(max-width: 700px) 45vw, 220px' } = Astro.props;
+const suffix = name ? ` — ${name}` : ', detail';
+---
+
+<div class="pair">
+  <div class="cells">
+    <div class="cell">
+      <Image src={before} alt={`Before treatment${suffix}`} widths={[220, 440, 720]} {sizes} />
+    </div>
+    <div class="cell">
+      <Image src={after} alt={`After treatment${suffix}`} widths={[220, 440, 720]} {sizes} />
+    </div>
+  </div>
+  <div class="labels">
+    <p class="mono label">Before</p>
+    <p class="mono label after">After</p>
+  </div>
+</div>
+
+<style>
+  .cells {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .cell {
+    overflow: hidden;
+    background: #efefef;
+  }
+  .cell img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.15;
+    object-fit: cover;
+    object-position: 50% 72%;
+    display: block;
+    transform: scale(1.7);
+    transform-origin: 50% 72%;
+  }
+  .labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .label { font-size: 11px; letter-spacing: 0.16em; }
+  .label.after { color: var(--ink); }
+</style>

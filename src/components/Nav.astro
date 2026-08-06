@@ -1,0 +1,63 @@
+---
+import { DONATE_URL, SITE_NAME } from '../consts';
+
+const path = Astro.url.pathname;
+const onPatients = path.startsWith('/patients');
+---
+
+<nav aria-label="Main">
+  <a class="wordmark" href="/">{SITE_NAME}</a>
+  <div class="links">
+    <a class:list={['link', { active: !onPatients }]} aria-current={!onPatients ? 'page' : undefined} href="/">Story</a>
+    <a class:list={['link', { active: onPatients }]} aria-current={onPatients ? 'page' : undefined} href="/patients/">Patients</a>
+    <a class="link donate" href={DONATE_URL} target="_blank" rel="noopener">Donate</a>
+  </div>
+</nav>
+
+<style>
+  /* mix-blend-mode: difference keeps the nav legible over both the white and
+     black sections without any scroll listeners. */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: clamp(12px, 2vw, 20px) clamp(20px, 3vw, 40px);
+    mix-blend-mode: difference;
+    color: #fff;
+  }
+  a { text-decoration: none; color: #fff; }
+  a:hover { color: #fff; }
+  .wordmark {
+    font-family: var(--font-hand);
+    font-weight: 700;
+    font-size: 24px;
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 2.4vw, 28px);
+  }
+  .link {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+  .link.active,
+  .link:hover,
+  .link:focus-visible { opacity: 1; }
+  .donate {
+    font-weight: 700;
+    opacity: 1;
+    border-bottom: 2px solid #fff;
+    padding-bottom: 2px;
+  }
+</style>

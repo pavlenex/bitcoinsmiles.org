@@ -1,0 +1,122 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import { afterPhoto } from '../lib/photos';
+
+// The child-style drawing of El Zonte, with a few neighbours' photo bubbles
+// scattered over it. Positions/rotations are part of the original design.
+const BUBBLES = [
+  { slug: 'antonia', left: '16%', top: '56%', rotate: '-3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
+  { slug: 'arcely', left: '92%', top: '46%', rotate: '5deg', radius: '47% 53% 52% 48% / 51% 49% 53% 47%' },
+  { slug: 'blanca', left: '22%', top: '70%', rotate: '-7deg', radius: '50% 50% 46% 54% / 52% 48% 50% 50%' },
+  { slug: 'carlos', left: '68%', top: '56%', rotate: '3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
+  { slug: 'elena', left: '93%', top: '60%', rotate: '-5deg', radius: '47% 53% 52% 48% / 51% 49% 53% 47%' },
+  { slug: 'margarita', left: '51%', top: '67%', rotate: '7deg', radius: '50% 50% 46% 54% / 52% 48% 50% 50%' },
+  { slug: 'maria', left: '84%', top: '70%', rotate: '-3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
+];
+
+const names = new Map((await getCollection('patients')).map((p) => [p.id, p.data.name]));
+const bubbles = BUBBLES.map((b) => ({ ...b, name: names.get(b.slug) ?? b.slug, photo: afterPhoto(b.slug) }));
+---
+
+<div class="map">
+  <svg
+    viewBox="0 0 460 360"
+    role="img"
+    aria-label="A child-style drawing of the El Zonte neighbourhood with an arrow pointing to Enrique's clinic"
+  >
+    <g fill="none" stroke="#0a0a0a" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="416" cy="44" r="17" stroke-width="2.2" stroke="#f0a71f"></circle>
+      <circle cx="410" cy="40" r="1.6" fill="#0a0a0a" stroke="none"></circle>
+      <circle cx="422" cy="40" r="1.6" fill="#0a0a0a" stroke="none"></circle>
+      <path d="M409,49 Q416,55 423,49" stroke-width="1.6"></path>
+      <path d="M416,14 L416,4 M416,74 L416,84 M386,44 L376,44 M446,44 L456,44 M395,23 L388,16 M437,23 L444,16 M395,65 L388,72 M437,65 L444,72" stroke-width="2.2" stroke="#f0a71f"></path>
+      <path d="M2,296 C70,284 150,304 240,292 C330,282 400,300 458,288" stroke-width="1.4"></path>
+      <path d="M304,236 h20 v15 h-20 z M301,236 L314,225 L327,236 M310,251 v-7 h5 v7" stroke-width="1.6"></path>
+      <path d="M26,326 Q40,316 54,326 M92,338 Q106,328 120,338 M164,324 Q178,314 192,324 M244,340 Q258,330 272,340 M324,326 Q338,316 352,326 M400,338 Q414,328 428,338" stroke-width="2" stroke="#2f6fbd" opacity="0.8"></path>
+      <g stroke-width="1.6">
+        <path d="M58,150 h26 v20 h-26 z M55,150 L71,136 L87,150 M66,170 v-9 h6 v9"></path>
+        <path d="M76,232 h24 v18 h-24 z M73,232 L88,219 L103,232"></path>
+        <path d="M244,214 h26 v20 h-26 z M241,214 L257,200 L273,214"></path>
+      </g>
+      <g stroke-width="1.4">
+        <path d="M388,232 C386,214 390,200 390,196"></path>
+        <path d="M390,196 C378,190 372,180 374,176 M390,196 C402,190 408,180 406,176 M390,196 C384,186 384,176 388,172 M390,196 C398,188 402,178 398,172 M390,196 C381,198 374,196 370,190 M390,196 C399,200 407,198 411,192 M376,181 l-4,-3 M381,178 l-3,-4 M403,181 l4,-3 M399,178 l3,-4" stroke="#2e7d32" stroke-width="1.5"></path>
+        <path d="M36,190 C34,176 38,166 38,162"></path>
+        <path d="M38,162 C28,158 24,150 26,146 M38,162 C48,158 52,150 50,146 M38,162 C34,152 36,146 40,142 M38,162 C30,164 24,162 20,156 M38,162 C46,166 54,164 58,158 M27,151 l-4,-2 M31,148 l-3,-4 M47,151 l4,-2 M43,148 l3,-4" stroke="#2e7d32" stroke-width="1.5"></path>
+      </g>
+      <g stroke-width="1.8">
+        <path d="M182,176 h44 v32 h-44 z"></path>
+        <path d="M177,176 L204,154 L231,176"></path>
+        <path d="M197,187 c0,-4.8 3,-7.8 7,-7.8 c4,0 7,3 7,7.8 c0,3 -1.1,5.1 -2,7.2 c-1,2.4 -1,5.1 -1.6,7.5 c-0.4,1.6 -2.2,1.7 -2.5,0 c-0.4,-1.9 -0.4,-4.2 -1.9,-4.2 c-1.5,0 -1.4,2.3 -1.9,4.2 c-0.3,1.7 -2.1,1.6 -2.5,0 c-0.6,-2.4 -0.6,-5.1 -1.6,-7.5 c-0.9,-2.1 -2,-4.2 -2,-7.2 z" stroke-width="1.5" fill="#ffffff"></path>
+      </g>
+      <path d="M290,112 C270,124 254,144 238,164" stroke-width="1.8" stroke="#d63b2f"></path>
+      <path d="M234,169 l15,-1 l-7,-12 z" fill="none" stroke="#d63b2f" stroke-width="1.8"></path>
+      <g stroke-width="1.4">
+        <circle cx="158" cy="172" r="10"></circle>
+        <path d="M150,166 Q154,160 158,164 Q162,160 166,166 M151,164 l-4,-5 M154,162 l-2,-6 M158,161 l0,-7 M162,162 l2,-6 M165,164 l4,-5"></path>
+        <circle cx="154.5" cy="170" r="1.2" fill="#0a0a0a" stroke="none"></circle>
+        <circle cx="161.5" cy="170" r="1.2" fill="#0a0a0a" stroke="none"></circle>
+        <path d="M153,175 Q158,180 163,175"></path>
+        <path d="M152,182 L148,210 L168,210 L164,182 M152,182 Q158,186 164,182 M158,188 L158,208"></path>
+        <circle cx="155" cy="194" r="0.9" fill="#0a0a0a" stroke="none"></circle>
+        <circle cx="155" cy="200" r="0.9" fill="#0a0a0a" stroke="none"></circle>
+        <path d="M152,186 C146,184 142,180 139,175 M139,175 l-7,-7 M134,166 l3.4,3.4 M136.5,163.5 l3.4,3.4 M139,161 l3.4,3.4"></path>
+        <path d="M164,186 C170,188 174,192 176,196 M176,196 a3.6,3.6 0 1 0 0.1,0"></path>
+        <path d="M152,210 L151,222 M165,210 L166,222 M151,222 l-5,1 M166,222 l5,1"></path>
+      </g>
+      <text x="158" y="238" font-size="20" fill="#555555" text-anchor="middle">Enrique</text>
+      <g transform="translate(-50,224)">
+        <path d="M62,12 L62,70" stroke-width="1.8" stroke="#0a0a0a"></path>
+        <path d="M63,15 C79,13 96,16 110,14 L109,24 C95,26 78,23 63,25 z" fill="#0047ab" fill-opacity="0.8" stroke="#0047ab" stroke-width="1.3"></path>
+        <path d="M63,25 C78,23 95,26 109,24 L108,34 C94,36 77,33 63,35 z" fill="#ffffff" stroke="#0a0a0a" stroke-width="1" stroke-opacity="0.4"></path>
+        <circle cx="86" cy="29" r="4.2" fill="none" stroke="#2e7d32" stroke-width="1.2"></circle>
+        <path d="M84,30.5 L86,27 L88,30.5 z" fill="#f0a71f" stroke="none"></path>
+        <path d="M63,35 C77,33 94,36 108,34 L107,44 C93,46 76,43 63,45 z" fill="#0047ab" fill-opacity="0.8" stroke="#0047ab" stroke-width="1.3"></path>
+      </g>
+    </g>
+    <text x="296" y="96" font-size="20" fill="#555555">Enrique's clinic!</text>
+    <text x="128" y="286" font-size="20" fill="#555555">the beach</text>
+  </svg>
+
+  {bubbles.map((b) => (
+    <a
+      class="bubble"
+      href={`/patients/${b.slug}/`}
+      title={b.name}
+      style={`left:${b.left};top:${b.top};--rot:${b.rotate};border-radius:${b.radius}`}
+    >
+      <Image src={b.photo} alt={b.name} width={120} height={120} densities={[1, 2]} />
+    </a>
+  ))}
+</div>
+
+<style>
+  .map {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  svg {
+    width: 100%;
+    display: block;
+    overflow: visible;
+  }
+  text { font-family: var(--font-hand); }
+  .bubble {
+    position: absolute;
+    width: clamp(34px, 8%, 54px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+    border: 1.5px solid var(--ink);
+    background: #efefef;
+  }
+  .bubble img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>

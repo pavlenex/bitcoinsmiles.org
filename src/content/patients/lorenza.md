@@ -2,7 +2,7 @@
 name: "Lorenza"
 date: 2026-03
 funding: "paid by what remains of the fund"
-order: 43
+order: 55
 ---
 
 Lorenza, known as Niña Lencha, is 70. She has been without teeth for 32 years, since 1993. The dentures she used at first never fitted properly and eventually broke, and she has significant alveolar bone loss.

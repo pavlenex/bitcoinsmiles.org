@@ -2,7 +2,7 @@
 name: "Coralia"
 date: 2026-03
 funding: "paid by what remains of the fund"
-order: 42
+order: 54
 ---
 
 Coralia is 79 and a widow. Two of her sons have died. She has no formal income and gets by selling fruit, fried vegetable pastries and firewood.

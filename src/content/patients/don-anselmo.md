@@ -2,7 +2,7 @@
 name: "Don Anselmo"
 date: 2026-05
 funding: "paid by what remains of the fund"
-order: 46
+order: 58
 ---
 
 Don Anselmo is 63 and has spent his whole life working in agriculture. He has arthritis, which causes him severe pain in his back, shoulders and knees.

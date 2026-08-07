@@ -2,7 +2,7 @@
 name: "Don Raúl"
 date: 2026-05
 funding: "paid by what remains of the fund"
-order: 49
+order: 61
 ---
 
 Don Raúl is 58 and works as a gardener. He is a cheerful, positive man. He lives with his son and his wife, and he looks after his wife, who has had severe diabetes since adolescence and has needed frequent stays in hospital because of it.

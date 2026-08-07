@@ -7,7 +7,7 @@ name: "Full Name"
 # Month of treatment, YYYY-MM
 date: 2026-08
 # How it was paid, exactly as it should read after "Treated <month> · "
-funding: "paid by what remains of the fund"
+funding: "funded by Bitcoin Smiles"
 # One higher than the current highest order (this sets the position in the list)
 order: 51
 ---

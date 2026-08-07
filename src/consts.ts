@@ -1,6 +1,6 @@
 export const SITE_NAME = 'Bitcoin Smiles';
 export const SITE_DESCRIPTION =
-  'Free dental care in rural El Salvador, funded in Bitcoin by thousands of strangers since 2021.';
+  'Bitcoin Smiles connects global Bitcoin support with free dental care in rural El Salvador.';
 export const DONATE_URL =
   'https://btcpay.bitcoinsmiles.org/apps/2G8kt2ax1okDYRguWQwa4khK7NDc/crowdfund';
 // "Bitcoin Smiles Initiative" — the film from the project's own channel.

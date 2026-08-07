@@ -11,7 +11,7 @@
   --story-text: #1c1c1c;
   --muted: #757575;        /* small labels on light backgrounds */
   --muted-on-dark: #999;   /* small labels on dark backgrounds */
-  --font-display: 'Anton', 'Arial Narrow', sans-serif;
+  --font-display: 'Caveat Variable', cursive;
   --font-body: 'Archivo Variable', 'Helvetica Neue', sans-serif;
   --font-hand: 'Caveat Variable', cursive;
   --font-mono: 'Space Mono', monospace;
@@ -40,8 +40,8 @@ a:hover { color: #555; }
 h1, h2, h3 {
   text-wrap: balance;
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 p { text-wrap: pretty; }

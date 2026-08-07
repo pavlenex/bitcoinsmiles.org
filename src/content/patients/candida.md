@@ -1,7 +1,7 @@
 ---
 name: "Cándida"
 date: 2026-04
-funding: "paid by what remains of the fund"
+funding: "funded by Bitcoin Smiles"
 order: 57
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: "Doña Rosa"
 date: 2026-03
-funding: "paid by what remains of the fund"
+funding: "funded by Bitcoin Smiles"
 order: 56
 ---
 

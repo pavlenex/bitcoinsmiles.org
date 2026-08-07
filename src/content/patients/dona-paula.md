@@ -1,7 +1,7 @@
 ---
 name: "Doña Paula"
 date: 2026-07
-funding: "paid by what remains of the fund"
+funding: "funded by Bitcoin Smiles"
 order: 62
 ---
 

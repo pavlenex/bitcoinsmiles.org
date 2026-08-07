@@ -5,7 +5,7 @@ funding: "paid by the 2021 raise"
 order: 26
 ---
 
-Pablo is 74 and has spent his whole life in masonry and construction. He also looks after ranches on the beach, which helps supplement his living expenses.
+Paolo is 74 and has spent his whole life in masonry and construction. He also looks after ranches on the beach, which helps supplement his living expenses.
 
 He has had a peptic ulcer for years. More recently he has had fainting spells and periods of weakness, and he is susceptible to progressive problems of the nervous system.
 

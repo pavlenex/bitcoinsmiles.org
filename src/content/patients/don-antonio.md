@@ -1,7 +1,7 @@
 ---
 name: "Don Antonio"
 date: 2026-05
-funding: "paid by what remains of the fund"
+funding: "funded by Bitcoin Smiles"
 order: 59
 ---
 

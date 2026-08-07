@@ -9,7 +9,7 @@ const onPatients = path.startsWith('/patients');
   <a class="wordmark" href="/">{SITE_NAME}</a>
   <div class="links">
     <a class:list={['link', { active: !onPatients }]} aria-current={!onPatients ? 'page' : undefined} href="/">Story</a>
-    <a class:list={['link', { active: onPatients }]} aria-current={onPatients ? 'page' : undefined} href="/patients/">Patients</a>
+    <a class:list={['link', { active: onPatients }]} aria-current={onPatients ? 'page' : undefined} href="/#smiles">Smiles</a>
     <a class="link donate" href={DONATE_URL} target="_blank" rel="noopener">Donate</a>
   </div>
 </nav>
@@ -28,7 +28,7 @@ const onPatients = path.startsWith('/patients');
     justify-content: space-between;
     gap: 14px;
     flex-wrap: wrap;
-    padding: clamp(12px, 2vw, 20px) clamp(20px, 3vw, 40px);
+    padding: clamp(12px, 2vw, 20px) var(--pad-x);
     mix-blend-mode: difference;
     color: #fff;
   }

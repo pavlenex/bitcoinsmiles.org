@@ -15,10 +15,16 @@
   --font-body: 'Archivo Variable', 'Helvetica Neue', sans-serif;
   --font-hand: 'Caveat Variable', cursive;
   --font-mono: 'Space Mono', monospace;
+  /* One horizontal gutter for every section on every page. */
+  --pad-x: clamp(24px, 3.4vw, 48px);
   color-scheme: light;
 }
 
 * { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 body {
   margin: 0;
@@ -71,15 +77,15 @@ p { text-wrap: pretty; }
    animation-timeline (e.g. Firefox) render the finished, fully visible page.
 --------------------------------------------------------------------------- */
 @supports (animation-timeline: view()) {
-  @keyframes tileIn {
+  @keyframes cardIn {
     from {
       opacity: 0;
-      transform: translate3d(var(--tx, 0px), var(--ty, 60vh), 500px)
-        rotate(var(--tr, 0deg)) scale(var(--ts, 2));
+      transform: translate(var(--tx, 0px), var(--ty, 60vh)) rotate(var(--tr, 0deg))
+        scale(var(--ts, 1.8));
     }
     to {
       opacity: 1;
-      transform: translate3d(0, var(--sy, 0px), 0) rotate(0deg) scale(1);
+      transform: none;
     }
   }
   @keyframes numOut {

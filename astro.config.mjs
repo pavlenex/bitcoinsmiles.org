@@ -9,6 +9,8 @@ export default defineConfig({
   site: 'https://bitcoinsmiles.org',
   integrations: [sitemap()],
   prefetch: true,
+  // The standalone patients index was folded into the homepage as "The smiles".
+  redirects: { '/patients': '/#smiles' },
   vite: {
     build: {
       // Lightning CSS (the default minifier) folds `animation-timeline` into

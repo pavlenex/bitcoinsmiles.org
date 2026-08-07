@@ -6,13 +6,13 @@ import { afterPhoto } from '../lib/photos';
 // The child-style drawing of El Zonte, with a few neighbours' photo bubbles
 // scattered over it. Positions/rotations are part of the original design.
 const BUBBLES = [
-  { slug: 'antonia', left: '16%', top: '56%', rotate: '-3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
-  { slug: 'arcely', left: '92%', top: '46%', rotate: '5deg', radius: '47% 53% 52% 48% / 51% 49% 53% 47%' },
-  { slug: 'blanca', left: '22%', top: '70%', rotate: '-7deg', radius: '50% 50% 46% 54% / 52% 48% 50% 50%' },
-  { slug: 'carlos', left: '68%', top: '56%', rotate: '3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
-  { slug: 'elena', left: '93%', top: '60%', rotate: '-5deg', radius: '47% 53% 52% 48% / 51% 49% 53% 47%' },
-  { slug: 'margarita', left: '51%', top: '67%', rotate: '7deg', radius: '50% 50% 46% 54% / 52% 48% 50% 50%' },
-  { slug: 'maria', left: '84%', top: '70%', rotate: '-3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
+  { slug: 'antonia', left: '13%', top: '28%', rotate: '-3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
+  { slug: 'arcely', left: '54%', top: '22%', rotate: '5deg', radius: '47% 53% 52% 48% / 51% 49% 53% 47%' },
+  { slug: 'blanca', left: '18%', top: '76%', rotate: '-7deg', radius: '50% 50% 46% 54% / 52% 48% 50% 50%' },
+  { slug: 'carlos', left: '78%', top: '40%', rotate: '3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
+  { slug: 'elena', left: '95%', top: '64%', rotate: '-5deg', radius: '47% 53% 52% 48% / 51% 49% 53% 47%' },
+  { slug: 'margarita', left: '56%', top: '80%', rotate: '7deg', radius: '50% 50% 46% 54% / 52% 48% 50% 50%' },
+  { slug: 'maria', left: '87%', top: '80%', rotate: '-3deg', radius: '53% 47% 50% 50% / 48% 52% 49% 51%' },
 ];
 
 const names = new Map((await getCollection('patients')).map((p) => [p.id, p.data.name]));

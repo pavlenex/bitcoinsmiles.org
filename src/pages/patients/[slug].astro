@@ -34,7 +34,7 @@ const description =
   ogType="article"
 >
   <article>
-    <a class="mono back" href="/patients/">← All patients</a>
+    <a class="mono back" href="/#smiles">← All the smiles</a>
     <h1>{entry.data.name}</h1>
     <p class="mono treated">Treated {monthYear(entry.data.date)} · {entry.data.funding}</p>
     <figure>
@@ -73,7 +73,7 @@ const description =
   article {
     max-width: 800px;
     margin: 0 auto;
-    padding: 130px 40px 120px;
+    padding: 130px var(--pad-x) 120px;
   }
   .back {
     font-size: 11px;

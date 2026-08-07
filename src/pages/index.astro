@@ -6,7 +6,7 @@ import NeighbourhoodMap from '../components/NeighbourhoodMap.astro';
 import Film from '../components/Film.astro';
 import BeforeAfterSlider from '../components/BeforeAfterSlider.astro';
 import { afterPhoto, beforePhoto } from '../lib/photos';
-import { SITE_NAME } from '../consts';
+import { SITE_NAME, monthYear } from '../consts';
 import enriquePhoto from '../photos/site/enrique.jpg';
 
 import bitcoinCa from '../photos/supporters/bitcoin-ca.png';
@@ -22,9 +22,10 @@ import bitmymoney from '../photos/press/bitmymoney.png';
 
 const patients = (await getCollection('patients')).sort((a, b) => a.data.order - b.data.order);
 
-// Deterministic scatter for the fly-in wall: same ranges as the original
-// hand-tuned values, but generated from a fixed seed so every patient —
-// including ones added later — gets a tile without anyone editing CSS.
+// Deterministic scatter for The smiles: the original wall choreography — every
+// card converges on the grid together as the section arrives, each with its own
+// flight path and landing moment, from a fixed seed so every patient —
+// including ones added later — gets a card without anyone editing CSS.
 function mulberry32(seed: number) {
   return () => {
     seed |= 0;
@@ -35,8 +36,7 @@ function mulberry32(seed: number) {
   };
 }
 const rand = mulberry32(20210903);
-const settle = [-18, -5, 6, 12, 16];
-const wall = patients.map((p) => ({
+const smiles = patients.map((p) => ({
   patient: p,
   photo: afterPhoto(p.id),
   style: [
@@ -44,10 +44,20 @@ const wall = patients.map((p) => ({
     `--ty:${Math.round(56 + rand() * 60)}vh`,
     `--tr:${Math.round(rand() * 34 - 18)}deg`,
     `--ts:${(1.5 + rand() * 1.15).toFixed(2)}`,
-    `--sy:${settle[Math.floor(rand() * settle.length)]}px`,
-    `--re:${26 + Math.round(rand() * 8)}%`,
+    `--re:${5 + Math.round(rand() * 15)}%`,
   ].join(';'),
 }));
+
+// The metrics converge the same chaotic way the smiles cards do.
+const metricScatter = Array.from({ length: 5 }, (_, i) =>
+  [
+    `--tx:${Math.round(rand() * 81 - 40)}vw`,
+    `--ty:${Math.round(40 + rand() * 50)}vh`,
+    `--tr:${Math.round(rand() * 28 - 14)}deg`,
+    `--ts:${(1.2 + rand() * 0.6).toFixed(2)}`,
+    `--re:${42 + i * 13}%`,
+  ].join(';')
+);
 
 const patientName = new Map(patients.map((p) => [p.id, p.data.name]));
 const comparisons = ['antonia', 'arcely', 'blanca'].map((slug) => ({
@@ -90,18 +100,192 @@ const press = [
     </div>
   </section>
 
-  <!-- Fly-in photo wall -->
-  <section class="wall" aria-label="The neighbours, after their appointment">
-    <div class="wall-pin">
-      <div class="tiles">
-        {wall.map(({ patient, photo, style }) => (
-          <a class="tile" href={`/patients/${patient.id}/`} title={patient.data.name} style={style}>
-            <Image
-              src={photo}
-              alt={patient.data.name}
-              widths={[240, 480]}
-              sizes="(max-width: 640px) 20vw, 10vw"
-            />
+  <!-- How it all started: pinned scrollytelling — copy left, one hand-drawn
+       scene right that gains elements as the story advances, clickable
+       timeline rail for orientation -->
+  <section class="origin" aria-label="How it all started">
+    <div class="beat-anchor" id="beat-1"></div>
+    <div class="beat-anchor" id="beat-2"></div>
+    <div class="beat-anchor" id="beat-3"></div>
+    <div class="origin-pin">
+      <div class="origin-frame">
+        <nav class="rail" aria-label="Story beats">
+          <span class="rail-line" aria-hidden="true"><span class="rail-fill"></span></span>
+          <a class="dot d-1" href="#beat-1"><span>the village</span></a>
+          <a class="dot d-2" href="#beat-2"><span>the dentist</span></a>
+          <a class="dot d-3" href="#beat-3"><span>the idea</span></a>
+        </nav>
+        <div class="beats">
+          <div class="chapter ch-1">
+            <div class="beat-copy">
+              <p class="figure">El Zonte, 2021</p>
+              <p class="desc">
+                A surf village in El Salvador starts running on Bitcoin. In the hills behind the
+                beach, work is paid by the day — and a bad tooth still costs a day's pay.
+              </p>
+            </div>
+          </div>
+          <div class="chapter ch-2">
+            <div class="beat-copy">
+              <p class="figure">One dentist</p>
+              <p class="desc">
+                Enrique Berrios had been the area's only dentist for sixteen years, in a clinic
+                six metres by four, treating neighbours who could not pay.
+              </p>
+            </div>
+          </div>
+          <div class="chapter ch-3">
+            <div class="beat-copy">
+              <p class="figure">One idea</p>
+              <p class="desc">
+                Put the clinic on the internet: raise one Bitcoin on free software, and let
+                strangers pay for the neighbours' teeth. Zero fees, zero middlemen.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="stage" aria-hidden="true">
+          <div class="scene-stack">
+            <svg viewBox="0 0 380 310" class="scene">
+              <g class="scene-base" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+              <circle cx="314" cy="48" r="15" stroke="#f0a71f" stroke-width="2"></circle>
+              <circle cx="309" cy="44" r="1.4" fill="#f0a71f" stroke="none"></circle>
+              <circle cx="319" cy="44" r="1.4" fill="#f0a71f" stroke="none"></circle>
+              <path d="M308,52 Q314,57 320,52" stroke="#f0a71f" stroke-width="1.4"></path>
+              <path d="M314,22 L314,13 M314,74 L314,83 M288,48 L279,48 M340,48 L349,48 M296,30 L290,24 M332,30 L338,24 M296,66 L290,72 M332,66 L338,72" stroke="#f0a71f" stroke-width="2"></path>
+              <path d="M52,138 h30 v22 h-30 z M48,138 L67,121 L86,138 M60,160 v-10 h8 v10"></path>
+              <path d="M150,168 h26 v19 h-26 z M147,168 L163,154 L179,168"></path>
+              <path d="M233,128 h24 v18 h-24 z M230,128 L245,115 L260,128 M239,146 v-8 h6 v8"></path>
+              <path d="M108,190 C106,176 110,166 110,162 M110,162 C100,158 96,150 98,146 M110,162 C120,158 124,150 122,146 M110,162 C106,152 108,146 112,142 M110,162 C102,164 96,162 92,156 M110,162 C118,166 126,164 130,158" stroke="#2e7d32" stroke-width="1.5"></path>
+              <path d="M300,182 C298,170 302,162 302,158 M302,158 C294,155 291,148 293,145 M302,158 C310,155 313,148 311,145 M302,158 C298,150 300,145 303,142 M302,158 C295,160 290,158 287,153 M302,158 C309,161 315,159 318,154" stroke="#2e7d32" stroke-width="1.5"></path>
+              <path d="M28,214 L28,168" stroke-width="1.8"></path>
+              <path d="M29,171 C41,169 54,172 65,170 L64,178 C53,180 40,177 29,179 z" fill="#0047ab" fill-opacity="0.85" stroke="#0047ab" stroke-width="1.2"></path>
+              <path d="M29,179 C40,177 53,180 64,178 L63,186 C52,188 39,185 29,187 z" fill="#ffffff" stroke="#fff" stroke-opacity="0.4" stroke-width="1"></path>
+              <path d="M29,187 C39,185 52,188 63,186 L62,194 C51,196 38,193 29,195 z" fill="#0047ab" fill-opacity="0.85" stroke="#0047ab" stroke-width="1.2"></path>
+              <path d="M10,236 C80,224 165,244 250,232 C320,224 352,238 372,232" stroke-width="1.4"></path>
+              <path d="M36,262 Q48,253 60,262 M104,272 Q116,263 128,272 M180,258 Q192,249 204,258 M256,272 Q268,263 280,272 M322,260 Q334,251 346,260" stroke="#2f6fbd" stroke-width="1.8" opacity="0.85"></path>
+              <text x="196" y="292" font-size="19" fill="#9a9a9a" class="hand" stroke="none">the beach</text>
+            </g>
+            </svg>
+            <div class="layer layer-clinic">
+              <svg viewBox="0 0 380 310" class="scene">
+                <g class="scene-clinic" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M318,184 h38 v28 h-38 z" stroke-width="1.8"></path>
+              <path d="M313,184 L337,163 L361,184" stroke-width="1.8"></path>
+              <path d="M330,194 c0,-4.8 3,-7.8 7,-7.8 c4,0 7,3 7,7.8 c0,3 -1.1,5.1 -2,7.2 c-1,2.4 -1,5.1 -1.6,7.5 c-0.4,1.6 -2.2,1.7 -2.5,0 c-0.4,-1.9 -0.4,-4.2 -1.9,-4.2 c-1.5,0 -1.4,2.3 -1.9,4.2 c-0.3,1.7 -2.1,1.6 -2.5,0 c-0.6,-2.4 -0.6,-5.1 -1.6,-7.5 c-0.9,-2.1 -2,-4.2 -2,-7.2 z" stroke="none" fill="#fff"></path>
+              <g transform="translate(150,46) scale(0.75)" stroke-width="1.9">
+                <circle cx="158" cy="172" r="10"></circle>
+                <path d="M150,166 Q154,160 158,164 Q162,160 166,166 M151,164 l-4,-5 M154,162 l-2,-6 M158,161 l0,-7 M162,162 l2,-6 M165,164 l4,-5"></path>
+                <circle cx="154.5" cy="170" r="1.2" fill="#fff" stroke="none"></circle>
+                <circle cx="161.5" cy="170" r="1.2" fill="#fff" stroke="none"></circle>
+                <path d="M153,175 Q158,180 163,175"></path>
+                <path d="M152,182 L148,210 L168,210 L164,182 M152,182 Q158,186 164,182 M158,188 L158,208"></path>
+                <circle cx="155" cy="194" r="0.9" fill="#fff" stroke="none"></circle>
+                <circle cx="155" cy="200" r="0.9" fill="#fff" stroke="none"></circle>
+                <path d="M152,186 C146,184 142,180 139,175 M139,175 l-7,-7 M134,166 l3.4,3.4 M136.5,163.5 l3.4,3.4 M139,161 l3.4,3.4"></path>
+                <path d="M164,186 C170,188 174,192 176,196 M176,196 a3.6,3.6 0 1 0 0.1,0"></path>
+                <path d="M152,210 L151,222 M165,210 L166,222 M151,222 l-5,1 M166,222 l5,1"></path>
+              </g>
+              <text x="252" y="230" font-size="17" fill="#9a9a9a" class="hand" stroke="none">Enrique</text>
+            </g>
+              </svg>
+            </div>
+            <div class="layer layer-network">
+              <svg viewBox="0 0 380 310" class="scene">
+                <g class="scene-network">
+              <g fill="none" stroke="#fff" stroke-linecap="round" stroke-width="1.5">
+                <circle cx="48" cy="30" r="5.5"></circle>
+                <circle cx="150" cy="16" r="5.5"></circle>
+                <circle cx="244" cy="24" r="5.5"></circle>
+                <circle cx="26" cy="112" r="5.5"></circle>
+                <circle cx="352" cy="108" r="5.5"></circle>
+              </g>
+              <g fill="none" stroke="#fff" stroke-width="1" opacity="0.3" stroke-dasharray="3 5">
+                <path d="M54,32 L144,18"></path>
+                <path d="M156,17 L238,23"></path>
+                <path d="M46,36 L28,106"></path>
+                <path d="M250,26 C290,50 330,80 348,103"></path>
+              </g>
+              <g fill="none" stroke="#fff" stroke-width="0.8" opacity="0.22" stroke-dasharray="2 6">
+                <path id="satp1" d="M48,30 C120,70 220,110 330,172"></path>
+                <path id="satp2" d="M352,108 C346,132 340,150 336,168"></path>
+                <path id="satp3" d="M26,112 C100,160 210,180 316,184"></path>
+                <path id="satp4" d="M244,24 C270,80 300,130 332,168"></path>
+              </g>
+              <g class="sats" fill="#f0a71f" stroke="none">
+                <circle r="3"><animateMotion dur="3.6s" repeatCount="indefinite"><mpath href="#satp1"></mpath></animateMotion></circle>
+                <circle r="3"><animateMotion dur="3.6s" begin="-1.8s" repeatCount="indefinite"><mpath href="#satp1"></mpath></animateMotion></circle>
+                <circle r="3"><animateMotion dur="2.6s" begin="-0.9s" repeatCount="indefinite"><mpath href="#satp2"></mpath></animateMotion></circle>
+                <circle r="3"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#satp3"></mpath></animateMotion></circle>
+                <circle r="3"><animateMotion dur="4s" begin="-2.1s" repeatCount="indefinite"><mpath href="#satp3"></mpath></animateMotion></circle>
+                <circle r="3"><animateMotion dur="3.2s" begin="-1.4s" repeatCount="indefinite"><mpath href="#satp4"></mpath></animateMotion></circle>
+              </g>
+              <text x="40" y="12" font-size="15" fill="#9a9a9a" class="hand">strangers on the internet</text>
+            </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The numbers: a loud stats band — hard rules, indexed cells, counters
+       that roll up as the tiles land one by one -->
+  <section class="numbers" aria-label="What the internet did">
+    <div class="numbers-inner">
+      <div class="metrics">
+        <div class="metric m-1" style={metricScatter[0]}>
+          <p class="mono idx">01</p>
+          <p class="figure"><span class="count" data-count="2741">2,741</span> people</p>
+          <p class="mono caption">from all over the internet funded it</p>
+        </div>
+        <div class="metric m-2" style={metricScatter[1]}>
+          <p class="mono idx">02</p>
+          <p class="figure"><span class="count" data-count="1.9" data-decimals="1">1.9</span> BTC</p>
+          <p class="mono caption">raised on free software · the goal was 1 · zero fees, zero middlemen</p>
+        </div>
+        <div class="metric m-3" style={metricScatter[2]}>
+          <p class="mono idx">03</p>
+          <p class="figure"><span class="count" data-count="250">250</span>+</p>
+          <p class="mono caption">patients treated in Enrique's chair, free of charge</p>
+        </div>
+        <div class="metric m-4" style={metricScatter[3]}>
+          <p class="mono idx">04</p>
+          <p class="figure"><span class="count" data-count="66">66</span></p>
+          <p class="mono caption">
+            neighbours who had lost every tooth — complete-denture rehabilitations, 132 dentures
+            built from scratch
+          </p>
+        </div>
+        <div class="metric m-5" style={metricScatter[4]}>
+          <p class="mono idx">05</p>
+          <p class="figure"><span class="count" data-count="200">200</span></p>
+          <p class="mono caption">children given preventive check-ups before the damage starts</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The smiles: every patient, scattering into the record as you scroll -->
+  <section class="smiles" id="smiles">
+    <div class="smiles-inner">
+      <h2 class="reveal" style="--r0:12%;--r1:45%">The smiles</h2>
+      <div class="grid">
+        {smiles.map(({ patient, photo, style }) => (
+          <a class="card" href={`/patients/${patient.id}/`} style={style}>
+            <div class="photo">
+              <Image
+                src={photo}
+                alt={patient.data.name}
+                widths={[300, 600]}
+                sizes="(max-width: 520px) 44vw, (max-width: 1100px) 30vw, 300px"
+              />
+            </div>
+            <div class="meta">
+              <p class="name">{patient.data.name}</p>
+              <p class="date">{monthYear(patient.data.date)}</p>
+            </div>
           </a>
         ))}
       </div>
@@ -140,39 +324,11 @@ const press = [
 
   <Film />
 
-  <!-- The numbers -->
-  <section class="numbers">
-    <div class="numbers-pin">
-      <div class="num num-1">
-        <p class="figure">2,741 people</p>
-        <p class="mono caption">from all over the internet funded it</p>
-      </div>
-      <div class="num num-2">
-        <p class="figure">1.9 BTC</p>
-        <p class="mono caption">raised on free software. The goal was 1. Zero fees, zero middlemen</p>
-      </div>
-    </div>
-  </section>
-
   <!-- Where it went -->
   <section class="went">
     <div class="went-inner">
       <p class="mono reveal">Where it went</p>
       <h2 class="reveal" style="--r0:15%;--r1:55%">Four years of appointments, one fund</h2>
-      <div class="stats">
-        <div class="reveal" style="--r0:20%;--r1:60%">
-          <p class="stat">500+</p>
-          <p class="mono stat-caption">patients treated, free of charge</p>
-        </div>
-        <div class="reveal" style="--r0:28%;--r1:68%">
-          <p class="stat">80+</p>
-          <p class="mono stat-caption">full dental reconstructions, teeth rebuilt from nothing</p>
-        </div>
-        <div class="reveal" style="--r0:36%;--r1:76%">
-          <p class="stat">300+</p>
-          <p class="mono stat-caption">children given preventive care before the damage starts</p>
-        </div>
-      </div>
       <div class="comparisons">
         {comparisons.map(({ slug, name, before, after }) => (
           <div class="reveal" style="--r0:10%;--r1:55%">
@@ -222,7 +378,7 @@ const press = [
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    padding: 0 clamp(20px, 3.4vw, 48px) 30px;
+    padding: 0 var(--pad-x) 30px;
   }
   .hero-copy { flex: 0.9 1 320px; min-width: 0; }
   h1 {
@@ -242,47 +398,56 @@ const press = [
   }
   .hero-map { flex: 1.35 1 420px; min-width: 0; }
 
-  /* --- Fly-in wall --- */
-  .wall { background: var(--paper-warm); }
-  .wall-pin {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+  /* --- The smiles --- */
+  .smiles {
+    background: var(--paper);
+    padding: 120px var(--pad-x);
+    /* Cards fly in from outside their boxes; keep the flight inside the section. */
+    overflow: clip;
   }
-  .tiles {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: stretch;
-    gap: 10px;
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-    padding: 22px 18px 18px;
-    transform-style: preserve-3d;
+  .smiles-inner { max-width: 1400px; margin: 0 auto; }
+  .smiles h2 {
+    font-size: clamp(48px, 8vw, 140px);
+    line-height: 0.9;
+    text-transform: uppercase;
+    margin: 0;
   }
-  .tile {
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 56px;
+  }
+  .card {
+    text-decoration: none;
+    color: var(--ink);
     display: block;
-    position: relative;
-    overflow: hidden;
-    background: #efefef;
-    width: calc(10% - 9px);
-    height: calc(20% - 8px);
-    min-height: 0;
   }
-  .tile img {
-    position: absolute;
-    inset: 0;
+  .photo { overflow: hidden; background: #efefef; }
+  .photo img {
     width: 100%;
-    height: 100%;
+    height: auto;
+    aspect-ratio: 0.85;
     object-fit: cover;
-    object-position: 50% 30%;
+    display: block;
   }
-  /* On phones a 10-wide row makes faces unrecognisable; go 5-wide instead. */
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 10px;
+    gap: 10px;
+  }
+  .name { font-size: 14.5px; font-weight: 700; margin: 0; }
+  .date {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    margin: 0;
+  }
   @media (max-width: 640px) {
-    .tiles { padding: 18px 12px 14px; gap: 8px; }
-    .tile { width: calc(20% - 7px); height: calc(10% - 8px); }
+    .smiles { padding: 90px 24px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   }
 
   /* --- Enrique --- */
@@ -291,7 +456,7 @@ const press = [
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 120px 48px;
+    padding: 120px var(--pad-x);
     background: var(--ink);
     color: #fff;
   }
@@ -311,7 +476,7 @@ const press = [
     display: grid;
     grid-template-columns: minmax(240px, 340px) 1fr;
     gap: clamp(44px, 6vw, 110px);
-    align-items: center;
+    align-items: start;
     margin-top: clamp(44px, 6vh, 72px);
   }
   .portrait { margin: 0; }
@@ -351,18 +516,113 @@ const press = [
     .portrait { max-width: 340px; }
   }
 
-  /* --- Numbers --- */
+  /* --- How it started & the numbers (shared full-screen chunk styling) --- */
+  .origin,
   .numbers { background: var(--ink); color: #fff; }
-  .num {
-    min-height: 100vh;
+  .origin { position: relative; }
+  /* Jump targets for the timeline rail dots. */
+  .beat-anchor { position: absolute; width: 1px; height: 1px; }
+  #beat-1 { top: 5%; }
+  #beat-2 { top: 26%; }
+  #beat-3 { top: 48%; }
+  .rail { display: none; }
+  .origin-frame {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .chapter {
+    min-height: 88vh;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     justify-content: center;
-    padding: 0 48px;
+    padding: 0 var(--pad-x);
+  }
+  .chapter .figure { font-size: clamp(56px, 8vw, 160px); margin: 0; }
+  .beat-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    max-width: 580px;
+  }
+  .desc {
+    font-size: 17px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 46ch;
+    margin: 0;
+  }
+  .hand { font-family: var(--font-hand); }
+  .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--pad-x) 80px;
+  }
+  .scene-stack {
+    position: relative;
+    width: min(100%, 540px);
+  }
+  .scene {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .layer {
+    position: absolute;
+    inset: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sats { display: none; }
+  }
+  .numbers { position: relative; overflow: clip; }
+  .numbers-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px var(--pad-x);
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    width: 100%;
+  }
+  .metric {
+    background: var(--ink);
+    padding: clamp(24px, 3vw, 44px);
+  }
+  .idx {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--muted-on-dark);
+    margin-bottom: clamp(24px, 4vh, 48px);
+  }
+  .m-1 { grid-column: 1 / span 4; }
+  .m-2 { grid-column: 5 / span 2; }
+  .m-3 { grid-column: 1 / span 2; }
+  .m-4 { grid-column: 3 / span 2; }
+  .m-5 { grid-column: 5 / span 2; }
+  .metric .figure { font-size: clamp(48px, 5.6vw, 110px); }
+  .m-1 .figure,
+  .m-2 .figure { font-size: clamp(64px, 8.6vw, 168px); }
+  .metric .caption {
+    margin-top: 16px;
+    font-size: 12.5px;
+    max-width: 38ch;
+    line-height: 1.7;
+  }
+  @media (max-width: 700px) {
+    .metrics { grid-template-columns: 1fr; }
+    .m-1, .m-2, .m-3, .m-4, .m-5 { grid-column: 1; }
+    .numbers-inner { padding: 90px 24px; }
   }
   .figure {
-    font-size: clamp(80px, 15vw, 260px);
+    font-size: clamp(72px, 13vw, 240px);
     line-height: 0.85;
     font-family: var(--font-display);
     margin: 0;
@@ -372,10 +632,12 @@ const press = [
     letter-spacing: 0.16em;
     color: var(--muted-on-dark);
     margin-top: 30px;
+    max-width: 58ch;
+    line-height: 1.8;
   }
 
   /* --- Where it went --- */
-  .went { background: var(--paper); padding: 140px 48px; }
+  .went { background: var(--paper); padding: 140px var(--pad-x); }
   .went-inner { max-width: 1400px; margin: 0 auto; }
   .went h2 {
     font-size: clamp(32px, 4.4vw, 72px);
@@ -384,26 +646,11 @@ const press = [
     margin: 20px 0 0;
     max-width: 20ch;
   }
-  .stats,
   .comparisons {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: clamp(30px, 4vw, 70px);
-  }
-  .stats { margin-top: 80px; }
-  .comparisons { margin-top: 100px; }
-  .stat {
-    font-size: clamp(60px, 7.5vw, 130px);
-    line-height: 0.85;
-    font-family: var(--font-display);
-    margin: 0;
-  }
-  .stat-caption {
-    font-size: 13px;
-    letter-spacing: 0.14em;
-    color: #555;
-    margin-top: 22px;
-    line-height: 1.6;
+    margin-top: 80px;
   }
   .records { font-size: 11px; letter-spacing: 0.14em; margin-top: 26px; }
 
@@ -412,7 +659,7 @@ const press = [
   .backers-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 120px 48px 0;
+    padding: 120px var(--pad-x) 0;
     text-align: center;
   }
   .head-dark { color: var(--muted-on-dark); }
@@ -436,7 +683,8 @@ const press = [
 
   @media (max-width: 640px) {
     .enrique { padding: 90px 24px; }
-    .num { padding: 0 24px; }
+    .chapter { padding: 0 24px; }
+    .stage { padding: 0 24px 60px; }
     .went { padding: 100px 24px; }
     .backers-inner { padding: 90px 24px 0; }
   }
@@ -446,22 +694,15 @@ const press = [
      sense when the animations that resolve them are allowed to run. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      .wall {
-        height: 130vh;
-        view-timeline: --fly block;
-      }
-      .wall-pin {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow: hidden;
-        perspective: 1100px;
-      }
-      .tile {
-        animation: tileIn linear both;
+      /* The original wall choreography: one shared timeline on the section,
+         every card converging on the grid together as it arrives — staggered
+         landings via --re, settling at exactly its grid position (no offsets —
+         the grid must end up perfectly aligned). */
+      .smiles { view-timeline: --fly block; }
+      .card {
+        animation: cardIn linear both;
         animation-timeline: --fly;
-        animation-range: entry 60% contain var(--re, 30%);
-        will-change: transform, opacity;
+        animation-range: entry 60% contain var(--re, 10%);
       }
       .enrique .head {
         animation: chunk linear both;
@@ -478,27 +719,187 @@ const press = [
         animation-timeline: view();
         animation-range: entry 25% entry 75%;
       }
-      .numbers {
-        height: 300vh;
-        view-timeline: --num block;
+      .origin {
+        height: 400vh;
+        view-timeline: --origin block;
       }
-      .numbers-pin {
+      .origin-pin {
         position: sticky;
         top: 0;
         height: 100vh;
         overflow: hidden;
       }
-      .num { position: absolute; inset: 0; }
-      .num-1 {
-        animation: numIn linear both, numOut linear both;
-        animation-timeline: --num, --num;
-        animation-range: contain 0% contain 26%, contain 36% contain 50%;
+      .origin-frame {
+        height: 100%;
+        display: grid;
+        grid-template-columns: clamp(120px, 12vw, 170px) minmax(0, 1.02fr) minmax(0, 0.98fr);
       }
-      .num-2 {
+      .beats { position: relative; }
+      .chapter { position: absolute; inset: 0; }
+      .beat-copy {
+        height: 380px;
+        justify-content: space-between;
+      }
+      .stage { padding: 0 48px 0 0; }
+      /* The scene accumulates: clinic appears with beat two, the network and
+         its streaming sats with beat three, and everything stays. */
+      .layer-clinic,
+      .layer-network {
+        animation: sceneIn linear both;
+        animation-timeline: --origin;
+      }
+      .layer-clinic { animation-range: contain 26% contain 36%; }
+      .layer-network { animation-range: contain 54% contain 64%; }
+      /* Timeline rail: progress fill scrubbed by the section, dots light up
+         as their beat lands, and each dot is a jump link. */
+      .rail {
+        display: block;
+        position: relative;
+        align-self: center;
+        height: 380px;
+        margin-left: 48px;
+      }
+      .rail-line {
+        position: absolute;
+        left: 5px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.18);
+      }
+      .rail-fill {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        transform: scaleY(0);
+        transform-origin: top;
+        animation: railGrow linear both;
+        animation-timeline: --origin;
+        animation-range: contain 0% contain 64%;
+      }
+      .dot {
+        position: absolute;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.45);
+        background: var(--ink);
+        color: var(--muted-on-dark);
+        text-decoration: none;
+      }
+      .dot span {
+        position: absolute;
+        left: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        color: inherit;
+      }
+      .d-1 {
+        top: -5px;
+        animation: dotOn linear both;
+        animation-timeline: --origin;
+        animation-range: contain 0% contain 3%;
+      }
+      .d-2 {
+        top: calc(50% - 6px);
+        animation: dotOn linear both;
+        animation-timeline: --origin;
+        animation-range: contain 28% contain 31%;
+      }
+      .d-3 {
+        bottom: -5px;
+        animation: dotOn linear both;
+        animation-timeline: --origin;
+        animation-range: contain 56% contain 59%;
+      }
+      @keyframes sceneIn {
+        from { opacity: 0; }
+      }
+      @keyframes railGrow {
+        to { transform: scaleY(1); }
+      }
+      @keyframes dotOn {
+        to {
+          background: #fff;
+          border-color: #fff;
+          color: #fff;
+        }
+      }
+      @media (max-width: 820px) {
+        .rail { display: none; }
+        .beat-copy { height: auto; }
+        .origin-frame {
+          grid-template-columns: 1fr;
+          grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
+        }
+        .stage { padding: 0 20px 16px; }
+        .scene-stack { width: min(100%, 46vh); }
+      }
+      .ch-1 {
+        animation: numIn linear both, numOut linear both;
+        animation-timeline: --origin, --origin;
+        animation-range: entry 75% contain 8%, contain 20% contain 30%;
+      }
+      .ch-2 {
+        animation: numIn linear both, numOut linear both;
+        animation-timeline: --origin, --origin;
+        animation-range: contain 28% contain 42%, contain 48% contain 58%;
+      }
+      .ch-3 {
         animation: numIn linear both;
-        animation-timeline: --num;
-        animation-range: contain 48% contain 74%;
+        animation-timeline: --origin;
+        animation-range: contain 56% contain 72%;
+      }
+      .numbers {
+        min-height: 190vh;
+        view-timeline: --numfly block;
+      }
+      .numbers-inner {
+        position: sticky;
+        top: 0;
+        min-height: 100vh;
+      }
+      .metric {
+        animation: cardIn linear both;
+        animation-timeline: --numfly;
+        animation-range: entry 30% entry var(--re, 60%);
       }
     }
   }
 </style>
+
+<script>
+  // Count-up on arrival: numbers roll to their values as the tiles land.
+  const numbers = document.querySelector('.numbers');
+  const counters = [...document.querySelectorAll<HTMLElement>('.count')];
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (numbers && counters.length && !reducedMotion) {
+    const fmt = (v: number, dec: number) =>
+      dec ? v.toFixed(dec) : Math.round(v).toLocaleString('en-US');
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        counters.forEach((el, i) => {
+          const target = parseFloat(el.dataset.count ?? '0');
+          const dec = Number(el.dataset.decimals ?? 0);
+          const start = performance.now() + i * 240;
+          const tick = (t: number) => {
+            const p = Math.min(1, Math.max(0, (t - start) / 1400));
+            el.textContent = fmt(target * (1 - (1 - p) ** 3), dec);
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+      },
+      { threshold: 0.3 }
+    );
+    io.observe(numbers);
+  }
+</script>

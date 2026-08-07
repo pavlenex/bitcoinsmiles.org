@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 
 // One Markdown file per patient in src/content/patients/.
 // The filename (without .md) is the slug, and must match the photo filenames
-// in src/photos/after/<slug>.jpg and (optionally) src/photos/before/<slug>.jpg.
+// in src/photos/after/<slug>.jpg.
 const patients = defineCollection({
   loader: glob({ pattern: '[^_]*.md', base: './src/content/patients' }),
   schema: z.object({

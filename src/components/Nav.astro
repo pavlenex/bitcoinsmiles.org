@@ -8,7 +8,7 @@ const onPatients = path.startsWith('/patients');
 <nav aria-label="Main">
   <a class="wordmark" href="/">{SITE_NAME}</a>
   <div class="links">
-    <a class:list={['link', { active: !onPatients }]} aria-current={!onPatients ? 'page' : undefined} href="/">Story</a>
+    <a class:list={['link', { active: !onPatients }]} aria-current={!onPatients ? 'page' : undefined} href="/#story">Story</a>
     <a class:list={['link', { active: onPatients }]} aria-current={onPatients ? 'page' : undefined} href="/#smiles">Smiles</a>
     <a class="link donate" href={DONATE_URL} target="_blank" rel="noopener">Donate</a>
   </div>
@@ -51,13 +51,9 @@ const onPatients = path.startsWith('/patients');
     letter-spacing: 0;
     opacity: 1;
   }
-  .link.active,
   .link:hover,
   .link:focus-visible { opacity: 1; }
-  .link.active {
-    border-bottom: 2px solid currentColor;
-    padding-bottom: 2px;
-  }
+  /* Only Donate is underlined; the current page is exposed via aria-current only. */
   .donate {
     font-weight: 700;
     opacity: 1;

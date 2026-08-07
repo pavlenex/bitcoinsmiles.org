@@ -1,7 +1,5 @@
 /* ---------------------------------------------------------------------------
-   Design tokens — the original Claude design, extracted into variables.
-   One deliberate change: small gray labels were #888 on white (3.5:1), below
-   WCAG AA for small text; --muted is darkened just enough to pass (4.6:1).
+   Design tokens. --muted must keep at least 4.5:1 contrast on white (WCAG AA).
 --------------------------------------------------------------------------- */
 :root {
   --ink: #0a0a0a;
@@ -17,10 +15,18 @@
   --font-mono: 'Space Mono', monospace;
   /* One horizontal gutter for every section on every page. */
   --pad-x: clamp(24px, 3.4vw, 48px);
+  /* One body-prose size for section paragraphs. */
+  --text-body: 17px;
   color-scheme: light;
 }
 
 * { box-sizing: border-box; }
+
+html {
+  /* Stray horizontal overflow must never pan the page; clip keeps sticky working. */
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

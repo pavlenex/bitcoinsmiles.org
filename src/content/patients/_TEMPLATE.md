@@ -1,8 +1,7 @@
 ---
-# Copy this file to <slug>.md (e.g. juan.md) — files starting with _ are ignored.
-# Add the photos with the same slug:
-#   src/photos/after/<slug>.jpg   (required)
-#   src/photos/before/<slug>.jpg  (optional — shown as a before/after pair)
+# Copy this file to <slug>.md (e.g. juan.md). Files starting with _ are ignored.
+# Add the photo with the same slug:
+#   src/photos/after/<slug>.jpg
 name: "Full Name"
 # Month of treatment, YYYY-MM
 date: 2026-08

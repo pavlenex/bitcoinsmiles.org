@@ -2,8 +2,7 @@
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import BeforeAfterSlider from '../../components/BeforeAfterSlider.astro';
-import { afterPhoto, beforePhoto } from '../../lib/photos';
+import { afterPhoto } from '../../lib/photos';
 import { monthYear, SITE_NAME } from '../../consts';
 
 export async function getStaticPaths() {
@@ -17,7 +16,6 @@ export async function getStaticPaths() {
 const { entry, prev, next } = Astro.props;
 const { Content } = await render(entry);
 const after = afterPhoto(entry.id);
-const before = beforePhoto(entry.id);
 
 // First story paragraph, clipped at a word boundary, as the meta description.
 const firstParagraph = (entry.body ?? '').trim().split(/\n\s*\n/)[0] ?? '';
@@ -28,7 +26,7 @@ const description =
 ---
 
 <Base
-  title={`${entry.data.name} — ${SITE_NAME}`}
+  title={`${entry.data.name} · ${SITE_NAME}`}
   description={description}
   shareImage={after}
   ogType="article"
@@ -50,17 +48,6 @@ const description =
     <div class="story">
       <Content />
     </div>
-    {before && (
-      <div class="record">
-        <p class="mono record-hint">Drag to compare</p>
-        <BeforeAfterSlider
-          {before}
-          {after}
-          name={entry.data.name}
-          sizes="(max-width: 800px) calc(100vw - 80px), 480px"
-        />
-      </div>
-    )}
     <p class="mono provenance">Recorded by the clinic · published with permission</p>
     <nav class="pager" aria-label="Patients">
       {prev && <a href={`/patients/${prev.id}/`}>← {prev.data.name}</a>}
@@ -105,15 +92,6 @@ const description =
     line-height: 1.75;
     margin: 0 0 26px;
     color: var(--story-text);
-  }
-  .record {
-    margin-top: 30px;
-    max-width: 480px;
-  }
-  .record-hint {
-    font-size: 10.5px;
-    letter-spacing: 0.14em;
-    margin-bottom: 14px;
   }
   .provenance {
     font-size: 10.5px;

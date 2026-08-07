@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NeighbourhoodMap from '../components/NeighbourhoodMap.astro';
@@ -7,23 +8,27 @@ import { afterPhoto } from '../lib/photos';
 import { SITE_NAME, monthYear } from '../consts';
 import enriquePhoto from '../photos/site/enrique.jpg';
 
-import bitcoinCa from '../photos/supporters/bitcoin-ca.png';
-import peakshift from '../photos/supporters/peakshift.png';
-import square from '../photos/supporters/square.png';
-import swan from '../photos/supporters/swan.png';
-import theBitcoinCompany from '../photos/supporters/the-bitcoin-company.png';
-import theBiz from '../photos/supporters/the-biz.png';
-import walletOfSatoshi from '../photos/supporters/wallet-of-satoshi.png';
-import bitcoinMagazine from '../photos/press/bitcoinmagazine.png';
-import beInCrypto from '../photos/press/beincrypto.png';
-import bitmymoney from '../photos/press/bitmymoney.png';
+// Logo assets resolved by slug; every entry carries an outbound URL.
+const supporterLogos = import.meta.glob<{ default: ImageMetadata }>(
+  '../photos/supporters/*.png', { eager: true }
+);
+const pressLogos = import.meta.glob<{ default: ImageMetadata }>(
+  '../photos/press/*.png', { eager: true }
+);
+const logo = (dir: Record<string, { default: ImageMetadata }>, slug: string) => {
+  const mod = dir[Object.keys(dir).find((k) => k.endsWith(`/${slug}.png`) || k.endsWith(`/${slug}.jpg`)) ?? ''];
+  if (!mod) throw new Error(`Missing logo asset: ${slug}`);
+  return mod.default;
+};
+// Display height derived from aspect ratio so logos carry similar visual weight.
+const logoHeight = (img: ImageMetadata) =>
+  Math.max(24, Math.min(54, Math.round(66 / Math.sqrt(img.width / img.height))));
 
 const patients = (await getCollection('patients')).sort((a, b) => a.data.order - b.data.order);
 
-// Deterministic scatter for The smiles: the original wall choreography — every
-// card converges on the grid together as the section arrives, each with its own
-// flight path and landing moment, from a fixed seed so every patient —
-// including ones added later — gets a card without anyone editing CSS.
+// Seeded PRNG (mulberry32) generates per-card flight custom properties at
+// build time. Fixed seed keeps builds deterministic; new cards get values
+// automatically.
 function mulberry32(seed: number) {
   return () => {
     seed |= 0;
@@ -46,7 +51,7 @@ const smiles = patients.map((p) => ({
   ].join(';'),
 }));
 
-// The metrics converge the same chaotic way the smiles cards do.
+// Scatter values for the metric tiles; --re increases per tile to stagger landings.
 const metricScatter = Array.from({ length: 5 }, (_, i) =>
   [
     `--tx:${Math.round(rand() * 81 - 40)}vw`,
@@ -58,22 +63,30 @@ const metricScatter = Array.from({ length: 5 }, (_, i) =>
 );
 
 const supporters = [
-  { img: bitcoinCa, name: 'Bitcoin CA' },
-  { img: peakshift, name: 'Peakshift' },
-  { img: square, name: 'Square' },
-  { img: swan, name: 'Swan' },
-  { img: theBitcoinCompany, name: 'The Bitcoin Company' },
-  { img: theBiz, name: 'The Biz' },
-  { img: walletOfSatoshi, name: 'Wallet of Satoshi' },
-];
+  { slug: '1bitcoin-ca', name: '1Bitcoin.ca', url: 'https://1bitcoin.ca/' },
+  { slug: 'bitmymoney', name: 'Bitmymoney', url: 'https://www.bitmymoney.com/' },
+  { slug: 'bitrefill', name: 'Bitrefill', url: 'https://www.bitrefill.com/' },
+  { slug: 'blockstream', name: 'Blockstream', url: 'https://blockstream.com/' },
+  { slug: 'cobra', name: 'Cobra', url: 'https://twitter.com/CobraBitcoin', raw: true },
+  { slug: 'okcoin', name: 'Okcoin', url: 'https://www.okcoin.com/' },
+  { slug: 'peakshift', name: 'Peakshift', url: 'https://peakshift.com/' },
+  { slug: 'spending-bitcoin', name: 'Spending Bitcoin', url: 'https://spending-bitcoin.com/' },
+  { slug: 'square', name: 'Square', url: 'https://squareup.com/' },
+  { slug: 'swan', name: 'Swan', url: 'https://www.swanbitcoin.com/' },
+  { slug: 'the-bitcoin-company', name: 'The Bitcoin Company', url: 'https://twitter.com/TheBtcCompany' },
+  { slug: 'the-biz', name: 'The Biz with John Carvalho', url: 'https://thebiz.pro/' },
+  { slug: 'wallet-of-satoshi', name: 'Wallet of Satoshi', url: 'https://walletofsatoshi.com/' },
+].map((x) => ({ ...x, img: logo(supporterLogos, x.slug) }));
+
 const press = [
-  { img: bitcoinMagazine, name: 'Bitcoin Magazine' },
-  { img: beInCrypto, name: 'BeInCrypto' },
-  { img: bitmymoney, name: 'Bitmymoney' },
-];
+  { slug: 'forbes', name: 'Forbes', url: 'https://www.forbes.com/sites/martinrivers/2021/12/31/how-bitcoin-is-giving-elderly-el-salvadorians-a-reason-to-smile/' },
+  { slug: 'bitcoinmagazine', name: 'Bitcoin Magazine', url: 'https://bitcoinmagazine.com/business/el-salvador-bitcoin-smiles-raising-btc' },
+  { slug: 'beincrypto', name: 'BeInCrypto', url: 'https://es.beincrypto.com/dentista-el-salvador-lanza-campana-recaudar-btc-atender-zonas-rurales/' },
+].map((x) => ({ ...x, img: logo(pressLogos, x.slug) }));
+
 ---
 
-<Base title={`${SITE_NAME} — Bring smiles back to the neighbourhood`}>
+<Base title={`${SITE_NAME} · Bring smiles back to the neighbourhood`}>
   <!-- Hero -->
   <section class="hero">
     <div class="hero-inner">
@@ -92,10 +105,9 @@ const press = [
     </div>
   </section>
 
-  <!-- How it all started: pinned scrollytelling — copy left, one hand-drawn
-       scene right that gains elements as the story advances, clickable
-       timeline rail for orientation -->
+  <!-- Origin: pinned section; chapters crossfade on the section timeline, scene layers accumulate, rail dots are jump links -->
   <section class="origin" aria-label="How it all started">
+    <div class="beat-anchor" id="story"></div>
     <div class="beat-anchor" id="beat-1"></div>
     <div class="beat-anchor" id="beat-2"></div>
     <div class="beat-anchor" id="beat-3"></div>
@@ -244,35 +256,29 @@ const press = [
     </div>
   </section>
 
-  <!-- The numbers: a loud stats band — hard rules, indexed cells, counters
-       that roll up as the tiles land one by one -->
+  <!-- Metrics: bordered grid; tiles animate in on the section timeline, counters count up on view -->
   <section class="numbers" aria-label="What the internet did">
     <div class="numbers-inner">
       <div class="metrics">
         <div class="metric m-1" style={metricScatter[0]}>
-          <p class="mono idx">01</p>
           <p class="figure"><span class="count" data-count="2971">2,971</span> people</p>
           <p class="mono caption">from all over the internet funded it</p>
         </div>
         <div class="metric m-2" style={metricScatter[1]}>
-          <p class="mono idx">02</p>
           <p class="figure"><span class="count" data-count="1.9" data-decimals="1">1.9</span> BTC</p>
           <p class="mono caption">received by 31 December 2021 through self-hosted BTCPay Server</p>
         </div>
         <div class="metric m-3" style={metricScatter[2]}>
-          <p class="mono idx">03</p>
           <p class="figure"><span class="count" data-count="250">250</span>+</p>
           <p class="mono caption">patients treated in Enrique's chair, free of charge</p>
         </div>
         <div class="metric m-4" style={metricScatter[3]}>
-          <p class="mono idx">04</p>
           <p class="figure"><span class="count" data-count="66">66</span></p>
           <p class="mono caption">
             neighbours who had lost every tooth, with 132 complete dentures built from scratch
           </p>
         </div>
         <div class="metric m-5" style={metricScatter[4]}>
-          <p class="mono idx">05</p>
           <p class="figure"><span class="count" data-count="200">200</span></p>
           <p class="mono caption">children given preventive check-ups before the damage starts</p>
         </div>
@@ -280,7 +286,7 @@ const press = [
     </div>
   </section>
 
-  <!-- The smiles: every patient, scattering into the record as you scroll -->
+  <!-- Patient grid; cards animate in on a shared section timeline -->
   <section class="smiles" id="smiles">
     <div class="smiles-inner">
       <h2 class="reveal" style="--r0:12%;--r1:45%">The smiles</h2>
@@ -416,14 +422,38 @@ const press = [
     <div class="backers-inner">
       <p class="mono head-dark">Supported by</p>
       <div class="logos supporters">
-        {supporters.map(({ img, name }) => (
-          <img src={img.src} width={img.width} height={img.height} alt={name} loading="lazy" />
+        {supporters.map(({ img, name, url, raw }) => (
+          <a href={url} target="_blank" rel="noopener" title={name} class:list={[{ raw }]}>
+            <img
+              src={img.src}
+              width={img.width}
+              height={img.height}
+              alt={name}
+              loading="lazy"
+              style={`height:${logoHeight(img)}px`}
+            />
+          </a>
         ))}
       </div>
-      <p class="mono head-dark">Written about in</p>
+    </div>
+  </section>
+
+  <!-- Press logos on a light band between the two dark sections -->
+  <section class="press-band">
+    <div class="press-inner">
+      <p class="mono">Written about in</p>
       <div class="logos press">
-        {press.map(({ img, name }) => (
-          <img src={img.src} width={img.width} height={img.height} alt={name} loading="lazy" />
+        {press.map(({ img, name, url }) => (
+          <a href={url} target="_blank" rel="noopener" title={name}>
+            <img
+              src={img.src}
+              width={img.width}
+              height={img.height}
+              alt={name}
+              loading="lazy"
+              style={`height:${logoHeight(img)}px`}
+            />
+          </a>
         ))}
       </div>
     </div>
@@ -434,6 +464,7 @@ const press = [
   /* --- Hero --- */
   .hero {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     padding-top: clamp(64px, 9vh, 110px);
@@ -459,19 +490,22 @@ const press = [
     max-width: 14ch;
   }
   .hero-copy p {
-    font-size: clamp(16px, 1.4vw, 20px);
+    font-size: var(--text-body);
     line-height: 1.65;
     margin: 34px 0 0;
     max-width: 50ch;
     color: var(--body-text);
   }
   .hero-map { flex: 1.35 1 420px; min-width: 0; }
+  @media (max-width: 380px) {
+    h1 { font-size: 40px; }
+  }
 
   /* --- The smiles --- */
   .smiles {
     background: var(--paper);
     padding: 120px var(--pad-x);
-    /* Cards fly in from outside their boxes; keep the flight inside the section. */
+    /* Clip card flight paths to the section. */
     overflow: clip;
   }
   .smiles-inner { max-width: 1400px; margin: 0 auto; }
@@ -518,10 +552,14 @@ const press = [
     .smiles { padding: 90px 24px; }
     .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   }
+  @media (max-width: 400px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  }
 
   /* --- Enrique --- */
   .enrique {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -564,7 +602,6 @@ const press = [
   }
   .bio { max-width: 62ch; }
   .quote {
-    /* Enrique's own words, in the site's handwriting face. */
     font-family: var(--font-hand);
     font-weight: 600;
     font-size: clamp(28px, 2.8vw, 46px);
@@ -574,7 +611,7 @@ const press = [
     color: #fff;
   }
   .about {
-    font-size: clamp(16px, 1.4vw, 20px);
+    font-size: var(--text-body);
     line-height: 1.65;
     margin: 0;
     max-width: 52ch;
@@ -591,6 +628,7 @@ const press = [
   .origin { position: relative; }
   /* Jump targets for the timeline rail dots. */
   .beat-anchor { position: absolute; width: 1px; height: 1px; }
+  #story,
   #beat-1 { top: 5%; }
   #beat-2 { top: 25%; }
   #beat-3 { top: 45%; }
@@ -620,7 +658,7 @@ const press = [
     max-width: 580px;
   }
   .desc {
-    font-size: 17px;
+    font-size: var(--text-body);
     line-height: 1.65;
     color: rgba(255, 255, 255, 0.78);
     max-width: 46ch;
@@ -669,12 +707,6 @@ const press = [
   .metric {
     background: var(--ink);
     padding: clamp(24px, 3vw, 44px);
-  }
-  .idx {
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    color: var(--muted-on-dark);
-    margin-bottom: clamp(24px, 4vh, 48px);
   }
   .m-1 { grid-column: 1 / span 4; }
   .m-2 { grid-column: 5 / span 2; }
@@ -733,7 +765,7 @@ const press = [
     margin: 20px 0 0;
   }
   .santa-lead {
-    font-size: 17px;
+    font-size: var(--text-body);
     line-height: 1.65;
     color: var(--body-text);
     max-width: 48ch;
@@ -759,7 +791,7 @@ const press = [
   .backers-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 120px var(--pad-x) 0;
+    padding: 120px var(--pad-x) 110px;
     text-align: center;
   }
   .head-dark { color: var(--muted-on-dark); }
@@ -778,14 +810,32 @@ const press = [
     height: auto;
     filter: grayscale(1) brightness(10);
   }
-  .supporters { margin: 52px auto 100px; max-width: 1100px; }
-  .press { margin: 48px 0 0; padding-bottom: 40px; }
+  .logos a { display: inline-flex; }
+  .logos img { width: auto; }
+  /* Logos whose artwork must keep its own colours skip the white filter. */
+  .logos a.raw img { filter: none; }
+  .supporters { margin: 52px auto 0; max-width: 1100px; }
+  .press-band { background: var(--paper); }
+  .press-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 90px var(--pad-x);
+    text-align: center;
+  }
+  .press { margin: 44px 0 0; }
+  /* Dark ink on the light band. */
+  .press-band .logos img { filter: grayscale(1) brightness(0); }
 
+  @media (max-width: 820px) {
+    /* Static stacked layout on narrow viewports. */
+    .chapter { min-height: 0; padding-top: 72px; padding-bottom: 8px; }
+    .origin { padding-bottom: 8px; }
+    .stage { padding-top: 48px; }
+  }
   @media (max-width: 640px) {
     .enrique { padding: 90px 24px; }
-    .chapter { padding: 0 24px; }
-    .stage { padding: 0 24px 60px; }
-    .went { padding: 100px 24px; }
+    .chapter { padding-left: 24px; padding-right: 24px; }
+    .stage { padding-left: 24px; padding-right: 24px; padding-bottom: 60px; }
     .backers-inner { padding: 90px 24px 0; }
   }
 
@@ -794,10 +844,9 @@ const press = [
      sense when the animations that resolve them are allowed to run. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      /* The original wall choreography: one shared timeline on the section,
-         every card converging on the grid together as it arrives — staggered
-         landings via --re, settling at exactly its grid position (no offsets —
-         the grid must end up perfectly aligned). */
+      /* Cards animate on the section's named view timeline; --re staggers
+         landings. The keyframe must end at transform: none so the grid
+         stays aligned. */
       .smiles { view-timeline: --fly block; }
       .card {
         animation: cardIn linear both;
@@ -819,6 +868,7 @@ const press = [
         animation-timeline: view();
         animation-range: entry 25% entry 75%;
       }
+      @media (min-width: 821px) and (min-height: 601px) {
       .origin {
         height: 500vh;
         view-timeline: --origin block;
@@ -827,6 +877,7 @@ const press = [
         position: sticky;
         top: 0;
         height: 100vh;
+        height: 100dvh;
         overflow: hidden;
       }
       .origin-frame {
@@ -841,8 +892,8 @@ const press = [
         justify-content: space-between;
       }
       .stage { padding: 0 48px 0 0; }
-      /* The scene accumulates: clinic appears with beat two, the network and
-         its streaming sats with beat four, and everything stays. */
+      /* Scene layers fade in at their beat and persist (fill: both with a
+         from-only keyframe). */
       .layer-clinic,
       .layer-network {
         animation: sceneIn linear both;
@@ -850,8 +901,8 @@ const press = [
       }
       .layer-clinic { animation-range: contain 20% contain 30%; }
       .layer-network { animation-range: contain 60% contain 70%; }
-      /* Timeline rail: progress fill scrubbed by the section, dots light up
-         as their beat lands, and each dot is a jump link. */
+      /* Rail: fill scaleY is scrubbed by the section timeline; dots flip
+         color in their range and double as anchor links. */
       .rail {
         display: block;
         position: relative;
@@ -937,16 +988,6 @@ const press = [
           color: #fff;
         }
       }
-      @media (max-width: 820px) {
-        .rail { display: none; }
-        .beat-copy { height: auto; }
-        .origin-frame {
-          grid-template-columns: 1fr;
-          grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
-        }
-        .stage { padding: 0 20px 16px; }
-        .scene-stack { width: min(100%, 46vh); }
-      }
       .ch-1 {
         animation: numIn linear both, numOut linear both;
         animation-timeline: --origin, --origin;
@@ -967,14 +1008,18 @@ const press = [
         animation-timeline: --origin;
         animation-range: contain 60% contain 72%;
       }
-      .numbers {
-        min-height: 190vh;
-        view-timeline: --numfly block;
       }
-      .numbers-inner {
-        position: sticky;
-        top: 0;
-        min-height: 100vh;
+      /* Sticky hold only on viewports with room for it; the tile animation
+         itself applies at every size. */
+      .numbers { view-timeline: --numfly block; }
+      @media (min-width: 701px) and (min-height: 601px) {
+        .numbers { min-height: 190vh; }
+        .numbers-inner {
+          position: sticky;
+          top: 0;
+          min-height: 100vh;
+          min-height: 100dvh;
+        }
       }
       .metric {
         animation: cardIn linear both;
@@ -986,7 +1031,7 @@ const press = [
 </style>
 
 <script>
-  // Count-up on arrival: numbers roll to their values as the tiles land.
+  // Animate counters once when the section enters the viewport.
   const numbers = document.querySelector('.numbers');
   const counters = [...document.querySelectorAll<HTMLElement>('.count')];
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;

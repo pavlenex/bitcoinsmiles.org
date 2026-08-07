@@ -3,7 +3,6 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NeighbourhoodMap from '../components/NeighbourhoodMap.astro';
-import Film from '../components/Film.astro';
 import { afterPhoto } from '../lib/photos';
 import { SITE_NAME, monthYear } from '../consts';
 import enriquePhoto from '../photos/site/enrique.jpg';
@@ -235,7 +234,7 @@ const press = [
                 <circle r="3"><animateMotion dur="4s" begin="-2.1s" repeatCount="indefinite"><mpath href="#satp3"></mpath></animateMotion></circle>
                 <circle r="3"><animateMotion dur="3.2s" begin="-1.4s" repeatCount="indefinite"><mpath href="#satp4"></mpath></animateMotion></circle>
               </g>
-              <text x="40" y="12" font-size="15" fill="#9a9a9a" class="hand">an open-source community</text>
+              <text x="40" y="12" font-size="15" fill="#9a9a9a" class="hand">bitcoin community</text>
             </g>
               </svg>
             </div>
@@ -336,8 +335,6 @@ const press = [
       </div>
     </div>
   </section>
-
-  <Film />
 
   <!-- What's next: Bitcoin Smiles II in Santa Ana -->
   <section class="santa" aria-label="What's next: Santa Ana">

@@ -1,11 +1,11 @@
 ---
 /**
- * In-page donation flow. A donate link opens a small amount picker in USD;
- * on submit the amount is converted with the store's own public rate
- * (/api/rates, unauthenticated) and an invoice is created through the
- * crowdfund app's public endpoint, the same call the crowdfund page itself
- * makes. No API key exists anywhere in this repo. BTCPay's modal script
- * then shows checkout in an overlay.
+ * In-page donation flow. A donate link opens a small amount picker; on
+ * submit a USD-denominated invoice is created through the store's public
+ * pay-button endpoint (Store Settings -> "Allow anyone to create invoice"
+ * must be on), so BTCPay itself handles the exchange rate. No API key
+ * exists anywhere in this repo. BTCPay's modal script then shows checkout
+ * in an overlay.
  *
  * Everything degrades: without JavaScript the donate links stay plain
  * links to the crowdfund page, and any failure falls back to it too.
@@ -132,6 +132,7 @@ import { BTCPAY_HOST, CROWDFUND_APP_ID, BTCPAY_STORE_ID } from '../consts';
     const APP = dialog.dataset.app!;
     const STORE = dialog.dataset.store!;
     const CROWDFUND = `${HOST}/apps/${APP}/crowdfund`;
+    const PAY = `${HOST}/api/v1/invoices`;
     const input = dialog.querySelector<HTMLInputElement>('#donate-usd')!;
     const go = dialog.querySelector<HTMLButtonElement>('.go')!;
     const err = dialog.querySelector<HTMLElement>('.err')!;
@@ -160,18 +161,6 @@ import { BTCPAY_HOST, CROWDFUND_APP_ID, BTCPAY_STORE_ID } from '../consts';
     input.addEventListener('input', () => {
       chips.forEach((c) => c.classList.toggle('is-active', c.dataset.usd === input.value));
     });
-
-    /** The store's own exchange rate; no third-party price APIs. */
-    const fetchRate = async (): Promise<number> => {
-      const res = await fetch(`${HOST}/api/rates?storeId=${STORE}&currencyPairs=BTC_USD`);
-      if (!res.ok) throw new Error(`rate fetch failed: ${res.status}`);
-      const rate = Number((await res.json())?.[0]?.rate);
-      // Sanity bounds so a broken feed can never produce absurd invoices.
-      if (!Number.isFinite(rate) || rate < 1_000 || rate > 100_000_000) {
-        throw new Error('implausible exchange rate');
-      }
-      return rate;
-    };
 
     /** BTCPay's modal script, loaded on first use only. */
     let modalScript: Promise<void> | null = null;
@@ -203,20 +192,18 @@ import { BTCPAY_HOST, CROWDFUND_APP_ID, BTCPAY_STORE_ID } from '../consts';
 
       try {
         const scriptReady = ensureModalScript();
-        // The crowdfund is denominated in BTC, so convert at the store's rate.
-        const rate = await fetchRate();
-        const btc = (usd / rate).toFixed(8);
-
-        // Same public, unauthenticated call the crowdfund page makes.
-        const res = await fetch(CROWDFUND, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `amount=${btc}&jsonResponse=true`,
+        // USD-denominated invoice; BTCPay converts at its own rate.
+        const body = new URLSearchParams({
+          storeId: STORE,
+          price: String(usd),
+          currency: 'USD',
+          checkoutDesc: 'Bitcoin Smiles donation',
+          jsonResponse: 'true',
         });
+        const res = await fetch(PAY, { method: 'POST', body });
         if (!res.ok) throw new Error(`invoice creation failed: ${res.status}`);
         const raw = (await res.text()).trim();
-        // The endpoint answers with the bare invoice id (text/plain today,
-        // historically a small JSON object), so accept both.
+        // jsonResponse answers {invoiceId, ...}; tolerate a bare id too.
         const invoiceId = raw.startsWith('{')
           ? (JSON.parse(raw).invoiceId ?? JSON.parse(raw).id)
           : raw;

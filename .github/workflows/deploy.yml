@@ -29,6 +29,10 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
+      - name: Audit dependencies
+        # Fail the deploy on advisories that can affect what we ship.
+        # Review false positives with `npm audit` locally before overriding.
+        run: npm audit --audit-level=high
       - name: Build
         run: npm run build
       - name: Configure Pages

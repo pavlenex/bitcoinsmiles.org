@@ -8,7 +8,7 @@ import type { ImageMetadata } from 'astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import DonateModal from '../components/DonateModal.astro';
-import { SITE_NAME, SITE_DESCRIPTION } from '../consts';
+import { SITE_NAME, SITE_DESCRIPTION, BTCPAY_HOST } from '../consts';
 import defaultShareImage from '../photos/site/clinic.webp';
 
 interface Props {
@@ -29,6 +29,25 @@ const {
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const og = await getImage({ src: shareImage, width: 1200, format: 'jpg' });
 const ogUrl = new URL(og.src, Astro.site);
+
+// GitHub Pages can't set response headers, so the policy ships as a meta tag.
+// script-src 'unsafe-inline' is unavoidable: Astro emits every component's
+// behaviour as an inline module. frame-ancestors does nothing in a meta tag,
+// so clickjacking protection stays unsolved on Pages (needs a CDN for headers).
+const btcpayOrigin = new URL(BTCPAY_HOST).origin;
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' ${btcpayOrigin}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  `connect-src 'self' ${btcpayOrigin}`,
+  `frame-src ${btcpayOrigin}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "upgrade-insecure-requests",
+].join('; ');
 ---
 
 <!doctype html>
@@ -44,6 +63,7 @@ const ogUrl = new URL(og.src, Astro.site);
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#ffffff" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content={csp} />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />

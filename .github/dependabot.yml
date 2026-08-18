@@ -1,0 +1,17 @@
+# Weekly dependency update PRs so published advisories surface without
+# anyone watching the lockfile by hand.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for the site toolchain instead of drip-feed singles.
+      astro:
+        patterns: ['astro', '@astrojs/*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

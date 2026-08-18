@@ -6,11 +6,13 @@ const onPatients = path.startsWith('/patients');
 ---
 
 <nav aria-label="Main">
-  <a class="wordmark" href="/">{SITE_NAME}</a>
-  <div class="links">
+  <div class="nav-inner">
+    <a class="wordmark" href="/">{SITE_NAME}</a>
+    <div class="links">
     <a class:list={['link', { active: !onPatients }]} aria-current={!onPatients ? 'page' : undefined} href="/#story">Story</a>
     <a class:list={['link', { active: onPatients }]} aria-current={onPatients ? 'page' : undefined} href="/#smiles">Smiles</a>
-    <a class="link donate" href={DONATE_URL} target="_blank" rel="noopener">Donate</a>
+      <a class="link donate" data-donate href={DONATE_URL} target="_blank" rel="noopener">Donate</a>
+    </div>
   </div>
 </nav>
 
@@ -23,14 +25,20 @@ const onPatients = path.startsWith('/patients');
     left: 0;
     right: 0;
     z-index: 50;
+    padding: clamp(12px, 2vw, 20px) var(--pad-x);
+    mix-blend-mode: difference;
+    color: #fff;
+  }
+  /* Same 1400px grid as every section, so the wordmark and links sit on the
+     content edge instead of the window edge. */
+  .nav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
     flex-wrap: wrap;
-    padding: clamp(12px, 2vw, 20px) var(--pad-x);
-    mix-blend-mode: difference;
-    color: #fff;
   }
   a { text-decoration: none; color: #fff; }
   a:hover { color: #fff; }

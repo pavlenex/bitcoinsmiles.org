@@ -14,7 +14,7 @@ const socials = [
     <p class="mono open">Fund the next appointment</p>
     <h2>Make someone smile</h2>
     <div class="cta-row">
-      <a class="cta" href={DONATE_URL} target="_blank" rel="noopener">Donate in Bitcoin</a>
+      <a class="cta" data-donate href={DONATE_URL} target="_blank" rel="noopener">Donate in Bitcoin</a>
     </div>
     <div class="socials">
       {socials.map(({ label, aria, url, icon }) => (
@@ -36,11 +36,11 @@ const socials = [
 </footer>
 
 <style>
-  footer { background: var(--ink); color: #fff; }
+  footer { background: var(--ink); color: #fff; padding-inline: var(--pad-x); }
   .inner {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 110px var(--pad-x) 90px;
+    padding: 110px 0 90px;
     text-align: center;
   }
   .open { color: var(--muted-on-dark); }
@@ -86,6 +86,6 @@ const socials = [
     color: inherit;
   }
   @media (max-width: 640px) {
-    .inner { padding: 80px 24px 60px; }
+    .inner { padding: 80px 0 60px; }
   }
 </style>

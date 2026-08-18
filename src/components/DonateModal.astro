@@ -1,0 +1,230 @@
+---
+/**
+ * In-page donation flow. A donate link opens a small amount picker; on
+ * submit a USD-denominated invoice is created through the store's public
+ * pay-button endpoint (Store Settings -> "Allow anyone to create invoice"
+ * must be on), so BTCPay itself handles the exchange rate. No API key
+ * exists anywhere in this repo. BTCPay's modal script then shows checkout
+ * in an overlay.
+ *
+ * Everything degrades: without JavaScript the donate links stay plain
+ * links to the crowdfund page, and any failure falls back to it too.
+ */
+import { BTCPAY_HOST, CROWDFUND_APP_ID, BTCPAY_STORE_ID } from '../consts';
+---
+
+<dialog
+  id="donate-modal"
+  data-host={BTCPAY_HOST}
+  data-app={CROWDFUND_APP_ID}
+  data-store={BTCPAY_STORE_ID}
+  aria-labelledby="donate-title"
+>
+  <form method="dialog" class="head">
+    <h3 id="donate-title">Donate in Bitcoin</h3>
+    <button class="x" value="close" aria-label="Close">&times;</button>
+  </form>
+
+  <p class="mono note">Every donation goes to the crowdfund on our own BTCPay Server.</p>
+
+  <div class="presets" role="group" aria-label="Amount in US dollars">
+    <button type="button" class="chip" data-usd="5">$5</button>
+    <button type="button" class="chip is-active" data-usd="10">$10</button>
+    <button type="button" class="chip" data-usd="50">$50</button>
+    <button type="button" class="chip" data-usd="100">$100</button>
+  </div>
+
+  <label class="mono custom-label" for="donate-usd">or your own amount (USD)</label>
+  <input id="donate-usd" name="usd" type="number" inputmode="decimal" min="1" step="1" value="10" />
+
+  <button type="button" class="go">Create invoice</button>
+  <p class="mono err" role="alert" hidden>Could not reach the payment server. Opening the crowdfund page instead.</p>
+</dialog>
+
+<style>
+  dialog {
+    width: min(92vw, 400px);
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    padding: 26px 28px 28px;
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+  }
+  h3 {
+    font-family: var(--font-hand);
+    font-size: 34px;
+    line-height: 1;
+    margin: 0;
+  }
+  .x {
+    background: none;
+    border: 0;
+    font-size: 30px;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .note { color: var(--muted); margin: 10px 0 22px; }
+  .presets { display: flex; gap: 8px; }
+  .chip {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 0;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .chip.is-active { background: var(--ink); color: #fff; }
+  .custom-label { display: block; color: var(--muted); margin: 18px 0 6px; }
+  input {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  input:focus-visible, .chip:focus-visible, .go:focus-visible, .x:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .go {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    background: var(--ink);
+    color: #fff;
+    border: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 14px 0;
+    cursor: pointer;
+  }
+  .go:disabled { opacity: 0.6; cursor: wait; }
+  .err { color: #a33; margin: 12px 0 0; }
+</style>
+
+<script>
+  const dialog = document.getElementById('donate-modal') as HTMLDialogElement | null;
+
+  if (dialog && typeof dialog.showModal === 'function') {
+    const HOST = dialog.dataset.host!;
+    const APP = dialog.dataset.app!;
+    const STORE = dialog.dataset.store!;
+    const CROWDFUND = `${HOST}/apps/${APP}/crowdfund`;
+    const PAY = `${HOST}/api/v1/invoices`;
+    const input = dialog.querySelector<HTMLInputElement>('#donate-usd')!;
+    const go = dialog.querySelector<HTMLButtonElement>('.go')!;
+    const err = dialog.querySelector<HTMLElement>('.err')!;
+    const chips = [...dialog.querySelectorAll<HTMLButtonElement>('.chip')];
+
+    // Donate links open the picker; without JS they stay plain links.
+    document.querySelectorAll<HTMLAnchorElement>('a[data-donate]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        err.hidden = true;
+        dialog.showModal();
+      });
+    });
+
+    // Clicking the backdrop closes.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+        input.value = chip.dataset.usd!;
+      });
+    });
+    input.addEventListener('input', () => {
+      chips.forEach((c) => c.classList.toggle('is-active', c.dataset.usd === input.value));
+    });
+
+    /** BTCPay's modal script, loaded on first use only. */
+    let modalScript: Promise<void> | null = null;
+    const ensureModalScript = () => {
+      if (window.btcpay) return Promise.resolve();
+      modalScript ??= new Promise<void>((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = `${HOST}/modal/btcpay.js`;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('modal script failed to load'));
+        document.head.appendChild(s);
+        setTimeout(() => reject(new Error('modal script timed out')), 6000);
+      });
+      return modalScript;
+    };
+
+    go.addEventListener('click', async () => {
+      const usd = Number(input.value);
+      if (!Number.isFinite(usd) || usd < 1) {
+        input.reportValidity?.();
+        input.focus();
+        return;
+      }
+
+      go.disabled = true;
+      const label = go.textContent;
+      go.textContent = 'Creating invoice…';
+      err.hidden = true;
+
+      try {
+        const scriptReady = ensureModalScript();
+        // USD-denominated invoice; BTCPay converts at its own rate.
+        const body = new URLSearchParams({
+          storeId: STORE,
+          price: String(usd),
+          currency: 'USD',
+          checkoutDesc: 'Bitcoin Smiles donation',
+          jsonResponse: 'true',
+        });
+        const res = await fetch(PAY, { method: 'POST', body });
+        if (!res.ok) throw new Error(`invoice creation failed: ${res.status}`);
+        const raw = (await res.text()).trim();
+        // jsonResponse answers {invoiceId, ...}; tolerate a bare id too.
+        const invoiceId = raw.startsWith('{')
+          ? (JSON.parse(raw).invoiceId ?? JSON.parse(raw).id)
+          : raw;
+        if (!invoiceId || /[^A-Za-z0-9]/.test(invoiceId)) throw new Error('unexpected invoice response');
+
+        try {
+          await scriptReady;
+        } catch {
+          // Modal blocked or slow: the invoice exists, use the full page.
+          window.location.href = `${HOST}/i/${invoiceId}`;
+          return;
+        }
+        dialog.close();
+        window.btcpay!.showInvoice(invoiceId);
+      } catch (e) {
+        err.hidden = false;
+        setTimeout(() => window.open(CROWDFUND, '_blank', 'noopener'), 900);
+      } finally {
+        go.disabled = false;
+        go.textContent = label;
+      }
+    });
+  }
+</script>

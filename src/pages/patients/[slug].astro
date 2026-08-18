@@ -58,7 +58,8 @@ const description =
 
 <style>
   article {
-    max-width: 800px;
+    /* Reading column: 800px of content plus the shared side padding. */
+    max-width: calc(800px + 2 * var(--pad-x));
     margin: 0 auto;
     padding: 130px var(--pad-x) 120px;
   }
@@ -114,6 +115,6 @@ const description =
   }
   .pager .next { margin-left: auto; }
   @media (max-width: 640px) {
-    article { padding: 110px 24px 90px; }
+    article { padding: 110px var(--pad-x) 90px; }
   }
 </style>

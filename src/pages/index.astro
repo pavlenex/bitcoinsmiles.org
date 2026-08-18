@@ -266,7 +266,7 @@ const press = [
         </div>
         <div class="metric m-2" style={metricScatter[1]}>
           <p class="figure"><span class="count" data-count="1.9" data-decimals="1">1.9</span> BTC</p>
-          <p class="mono caption">received by 31 December 2021 through self-hosted BTCPay Server</p>
+          <p class="mono caption">received through self-hosted BTCPay Server so far</p>
         </div>
         <div class="metric m-3" style={metricScatter[2]}>
           <p class="figure"><span class="count" data-count="250">250</span>+</p>
@@ -468,6 +468,7 @@ const press = [
     display: flex;
     flex-direction: column;
     padding-top: clamp(64px, 9vh, 110px);
+    padding-inline: var(--pad-x);
   }
   .hero-inner {
     flex: 1;
@@ -478,7 +479,7 @@ const press = [
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    padding: 0 var(--pad-x) 30px;
+    padding: 0 0 30px;
   }
   .hero-copy { flex: 0.9 1 320px; min-width: 0; }
   h1 {
@@ -636,7 +637,9 @@ const press = [
   .rail { display: none; }
   .origin-frame {
     width: 100%;
-    max-width: 1400px;
+    /* Chapters carry the side padding, so the frame is widened by the same
+       amount to keep their content on the shared 1400px grid. */
+    max-width: calc(1400px + 2 * var(--pad-x));
     margin: 0 auto;
   }
   .chapter {
@@ -687,14 +690,14 @@ const press = [
   @media (prefers-reduced-motion: reduce) {
     .sats { display: none; }
   }
-  .numbers { position: relative; overflow: clip; }
+  .numbers { position: relative; overflow: clip; padding-inline: var(--pad-x); }
   .numbers-inner {
     max-width: 1400px;
     margin: 0 auto;
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding: 120px var(--pad-x);
+    padding: 120px 0;
   }
   .metrics {
     display: grid;
@@ -725,7 +728,7 @@ const press = [
   @media (max-width: 700px) {
     .metrics { grid-template-columns: 1fr; }
     .m-1, .m-2, .m-3, .m-4, .m-5 { grid-column: 1; }
-    .numbers-inner { padding: 90px 24px; }
+    .numbers-inner { padding: 90px 0; }
   }
   .figure {
     font-size: clamp(72px, 13vw, 240px);
@@ -787,11 +790,11 @@ const press = [
   }
 
   /* --- Supporters & press --- */
-  .backers { background: var(--ink); color: #fff; }
+  .backers { background: var(--ink); color: #fff; padding-inline: var(--pad-x); }
   .backers-inner {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 120px var(--pad-x) 110px;
+    padding: 120px 0 110px;
     text-align: center;
   }
   .head-dark { color: var(--muted-on-dark); }
@@ -813,11 +816,11 @@ const press = [
   }
   .logos a { display: inline-flex; }
   .supporters { margin: 52px auto 0; max-width: 1100px; }
-  .press-band { background: var(--paper); }
+  .press-band { background: var(--paper); padding-inline: var(--pad-x); }
   .press-inner {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 90px var(--pad-x);
+    padding: 90px 0;
     text-align: center;
   }
   .press { margin: 44px 0 0; }
@@ -834,7 +837,7 @@ const press = [
     .enrique { padding: 90px 24px; }
     .chapter { padding-left: 24px; padding-right: 24px; }
     .stage { padding-left: 24px; padding-right: 24px; padding-bottom: 60px; }
-    .backers-inner { padding: 90px 24px 0; }
+    .backers-inner { padding: 90px 0 0; }
   }
 
   /* --- Scroll-driven choreography (browsers with animation-timeline) ---

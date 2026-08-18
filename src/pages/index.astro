@@ -67,7 +67,7 @@ const supporters = [
   { slug: 'bitmymoney', name: 'Bitmymoney', url: 'https://www.bitmymoney.com/' },
   { slug: 'bitrefill', name: 'Bitrefill', url: 'https://www.bitrefill.com/' },
   { slug: 'blockstream', name: 'Blockstream', url: 'https://blockstream.com/' },
-  { slug: 'cobra', name: 'Cobra', url: 'https://twitter.com/CobraBitcoin', raw: true },
+  { slug: 'cobra', name: 'Cobra', url: 'https://twitter.com/CobraBitcoin' },
   { slug: 'okcoin', name: 'Okcoin', url: 'https://www.okcoin.com/' },
   { slug: 'peakshift', name: 'Peakshift', url: 'https://peakshift.com/' },
   { slug: 'spending-bitcoin', name: 'Spending Bitcoin', url: 'https://spending-bitcoin.com/' },
@@ -422,8 +422,8 @@ const press = [
     <div class="backers-inner">
       <p class="mono head-dark">Supported by</p>
       <div class="logos supporters">
-        {supporters.map(({ img, name, url, raw }) => (
-          <a href={url} target="_blank" rel="noopener" title={name} class:list={[{ raw }]}>
+        {supporters.map(({ img, name, url }) => (
+          <a href={url} target="_blank" rel="noopener" title={name}>
             <img
               src={img.src}
               width={img.width}
@@ -803,17 +803,15 @@ const press = [
     column-gap: clamp(44px, 6vw, 100px);
     row-gap: 56px;
   }
+  /* Supporter marks are pre-baked white-on-transparent PNGs, so no CSS
+     filter tricks are needed on the dark band. */
   .logos img {
     max-height: 72px;
     max-width: 220px;
     width: auto;
     height: auto;
-    filter: grayscale(1) brightness(10);
   }
   .logos a { display: inline-flex; }
-  .logos img { width: auto; }
-  /* Logos whose artwork must keep its own colours skip the white filter. */
-  .logos a.raw img { filter: none; }
   .supporters { margin: 52px auto 0; max-width: 1100px; }
   .press-band { background: var(--paper); }
   .press-inner {
